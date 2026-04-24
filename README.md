@@ -10,9 +10,9 @@
 
 **Language:** English | [简体中文](README.zh-CN.md)
 
-This repository hosts the official implementation of **RULER**, accepted to **SIGIR 2026**.
+This is the official repository for **RULER**, accepted to **SIGIR 2026**.
 
-> **Current status.** The paper has been accepted, but the public code release is still being prepared. This repository is currently being organized for release. Code, scripts, processed dataset links, checkpoints, and full reproduction instructions will be added progressively after cleanup and verification.
+> **Current status.** The paper has been accepted, but the public code release is still being prepared. This repository is currently being organized for release. Code, scripts, checkpoints, and full reproduction instructions will be added progressively after cleanup and verification.
 
 ## Table of Contents
 
@@ -121,7 +121,7 @@ RULER is evaluated on two Chinese legal statute retrieval benchmarks:
 | JuDGE-Stat | JuDGE | 2,505 | Small-sample legal statute retrieval benchmark. |
 | LeCaRDv2-Stat | LeCaRDv2 | 39,833 | Refined large-scale subset designed to reduce annotation sparsity and improve structural consistency. |
 
-Processed datasets and preparation scripts will be released after license and redistribution checks. Users should also follow the usage terms of the original JuDGE and LeCaRDv2 datasets.
+The dataset page is available on Hugging Face. Data preparation scripts and detailed usage instructions will be released after cleanup and license checks. Users should also follow the usage terms of the original JuDGE and LeCaRDv2 datasets.
 
 Hugging Face dataset page: [RULER-dataset/RULER](https://huggingface.co/datasets/RULER-dataset/RULER)
 
