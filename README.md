@@ -8,6 +8,8 @@
   <img src="https://img.shields.io/badge/Code-Coming%20Soon-lightgrey" alt="Code coming soon">
 </p>
 
+**Language:** English | [简体中文](README.zh-CN.md)
+
 This repository hosts the official implementation of **RULER**, accepted to **SIGIR 2026**.
 
 > **Current status.** The paper has been accepted, but the public code release is still being prepared. This repository is currently being organized for release. Code, scripts, processed dataset links, checkpoints, and full reproduction instructions will be added progressively after cleanup and verification.
