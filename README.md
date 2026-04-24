@@ -114,6 +114,8 @@ RULER is evaluated on two Chinese legal statute retrieval benchmarks:
 
 Processed datasets and preparation scripts will be released after license and redistribution checks. Users should also follow the usage terms of the original JuDGE and LeCaRDv2 datasets.
 
+Hugging Face dataset page: [RULER-dataset/RULER](https://huggingface.co/datasets/RULER-dataset/RULER)
+
 ## Release Roadmap
 
 - [x] Paper accepted to SIGIR 2026.

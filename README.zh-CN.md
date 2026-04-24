@@ -114,6 +114,8 @@ RULER 在两个中文法律法条检索基准上进行评估：
 
 处理后的数据和预处理脚本会在许可与再分发检查完成后发布。用户也应遵守原始 JuDGE 和 LeCaRDv2 数据集的使用条款。
 
+Hugging Face 数据集页面：[RULER-dataset/RULER](https://huggingface.co/datasets/RULER-dataset/RULER)
+
 ## 发布计划
 
 - [x] 论文被 SIGIR 2026 接收。
