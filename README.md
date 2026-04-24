@@ -18,6 +18,7 @@ This repository hosts the official implementation of **RULER**, accepted to **SI
 
 - [News](#news)
 - [Overview](#overview)
+- [Framework](#framework)
 - [Why RULER](#why-ruler)
 - [Method](#method)
 - [Results](#results)
@@ -40,6 +41,14 @@ Legal information retrieval requires both high recall and high precision. Standa
 **RULER** addresses this issue with a unified architecture built on a single **Qwen3-0.6B** backbone. The same backbone is progressively adapted for dense retrieval and LoRA-based cross-encoder reranking, allowing the two stages to share representations while preserving the efficiency of a two-stage pipeline.
 
 The framework is especially designed for legal retrieval scenarios where irrelevant candidates may receive over-confident scores. We refer to these high-scoring false positives as **phantom hits** and explicitly model them during reranker training.
+
+## Framework
+
+<p align="center">
+  <img src="assets/ruler-framework.png" alt="RULER framework" width="100%">
+</p>
+
+RULER consists of three connected parts: Stage 1 retrieval fine-tuning, retrieval-based data construction, and Stage 2 distribution-aware reranking. The training process explicitly models both mixed positive-negative groups and all-negative zero-recall groups.
 
 ## Why RULER
 
