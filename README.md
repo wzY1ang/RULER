@@ -17,14 +17,19 @@ This is the official repository for **RULER**, accepted to **SIGIR 2026**.
 ## Table of Contents
 
 - [News](#news)
+- [Paper](#paper)
+- [Abstract](#abstract)
 - [Overview](#overview)
 - [Framework](#framework)
-- [Why RULER](#why-ruler)
+- [Highlights](#highlights)
 - [Method](#method)
 - [Results](#results)
 - [Datasets](#datasets)
+- [Availability](#availability)
 - [Release Roadmap](#release-roadmap)
 - [Planned Repository Structure](#planned-repository-structure)
+- [License](#license)
+- [Acknowledgements](#acknowledgements)
 - [Citation](#citation)
 - [Contact](#contact)
 
@@ -33,6 +38,22 @@ This is the official repository for **RULER**, accepted to **SIGIR 2026**.
 - **2026-07:** RULER will appear at SIGIR 2026 in Melbourne, Australia.
 - **2026:** Paper accepted to the 49th International ACM SIGIR Conference on Research and Development in Information Retrieval.
 - **Pre-release:** Repository cleanup and release preparation are in progress.
+
+## Paper
+
+| Item | Information |
+|---|---|
+| Title | RULER: Robust Unified LLM-based Efficient Retrieval for Legal Information |
+| Authors | Chenyu Hou, Ziyang Wang, Bin Cao, Jiaxing Wang, Tianming Zhang, Tiantian Li |
+| Venue | SIGIR 2026 |
+| Conference | July 20-24, 2026, Melbourne, VIC, Australia |
+| DOI | 10.1145/3805712.3809698 |
+| Paper | Coming soon |
+| arXiv | Coming soon |
+
+## Abstract
+
+Legal information retrieval demands high precision, yet traditional retrieve-then-rerank pipelines with two separate models suffer from cascading error propagation and knowledge disconnects between stages. RULER addresses these issues with a unified parameter-sharing architecture that integrates efficient bi-encoder retrieval and high-precision cross-encoder reranking within a single Qwen3-0.6B backbone. To mitigate phantom hits, where irrelevant documents receive unreasonably high confidence, RULER introduces distribution-robust data construction with all-negative candidate groups, dynamic margin ranking, and maximum entropy regularization. Experiments on JuDGE-Stat and LeCaRDv2-Stat demonstrate strong retrieval, reranking, and robustness performance.
 
 ## Overview
 
@@ -50,13 +71,13 @@ The framework is especially designed for legal retrieval scenarios where irrelev
 
 RULER consists of three connected parts: Stage 1 retrieval fine-tuning, retrieval-based data construction, and Stage 2 distribution-aware reranking. The training process explicitly models both mixed positive-negative groups and all-negative zero-recall groups.
 
-## Why RULER
+## Highlights
 
-- **Unified retrieval and reranking:** one LLM backbone supports both candidate generation and reranking.
-- **Progressive training:** the reranker starts from the retrieval-adapted checkpoint instead of an unrelated model.
-- **Robust negative modeling:** mixed groups and all-negative groups simulate both normal ranking and zero-recall scenarios.
-- **Distribution-robust objective:** dynamic margin ranking and maximum entropy regularization reduce over-confidence on irrelevant candidates.
-- **Legal-domain evaluation:** experiments cover JuDGE-Stat and LeCaRDv2-Stat, two Chinese legal statute retrieval benchmarks.
+- **Single 596M checkpoint:** one Qwen3-0.6B checkpoint supports both retrieval and reranking, avoiding two independent deployed models.
+- **Strong large-scale retrieval:** RULER reaches 0.9001 MRR@100 and 0.8350 Recall@10 on LeCaRDv2-Stat.
+- **High-precision reranking:** RULER achieves 0.8605 NDCG@10 and 0.7653 MAP@10 on LeCaRDv2-Stat.
+- **Robust zero-recall behavior:** RULER reduces NR@R to 9.9% on JuDGE-Stat, mitigating over-confident phantom hits.
+- **Distribution-aware training:** mixed groups, all-negative groups, dynamic margin ranking, and entropy regularization are combined in one training pipeline.
 
 ## Method
 
@@ -125,6 +146,18 @@ The dataset page is available on Hugging Face. Data preparation scripts and deta
 
 Hugging Face dataset page: [RULER-dataset/RULER](https://huggingface.co/datasets/RULER-dataset/RULER)
 
+## Availability
+
+| Component | Status |
+|---|---|
+| README | Available |
+| Framework figure | Available |
+| Dataset page | Available on Hugging Face |
+| Training code | Coming soon |
+| Evaluation scripts | Coming soon |
+| Checkpoints | Coming soon, subject to release approval |
+| Reproduction guide | Coming soon |
+
 ## Release Roadmap
 
 - [x] Paper accepted to SIGIR 2026.
@@ -163,6 +196,14 @@ Installation commands will be added with the first code release. The expected en
 - PyTorch 2.0+
 - CUDA-enabled GPU for training and evaluation
 - `transformers`, `accelerate`, `peft`, `faiss`, `numpy`, `pandas`, and common evaluation utilities
+
+## License
+
+The project license will be announced before the full public release. Third-party models, datasets, and tokenizers remain subject to their original licenses.
+
+## Acknowledgements
+
+RULER builds on open research resources including Qwen, JuDGE, LeCaRDv2, BGE, and prior work on unified retrieval and reranking. We thank the authors and maintainers of these resources for making legal information retrieval research more reproducible.
 
 ## Citation
 
