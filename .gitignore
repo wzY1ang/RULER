@@ -1,0 +1,36 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+.idea/
+.vscode/
+.DS_Store
+
+# Models, adapters, and checkpoints
+hub/
+models/
+output/
+outputs/
+**/checkpoint-*/
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.onnx
+
+# Local data and indexes
+data/
+data2/
+*.faiss
+*.index
+
+# Experiment tracking and generated reports
+wandb/
+**/wandb/
+benchmark_results/
+*.log
+*.out
+*.err
