@@ -77,14 +77,6 @@ def load_rank_tsv(rank_path):
             rank_dict[qid].append(did)
     return rank_dict
 
-# ============================
-
-# ============================
-
-# ============================
-
-# ============================
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--train_json', required=True, help="Training ground-truth file")
@@ -99,26 +91,6 @@ def main():
     law_corpus = load_law_corpus(args.law_corpus)
     all_doc_ids = list(law_corpus.keys())
 
-
-    print("\nInspecting the training query file...")
-    try:
-        with open(args.train_json, 'r', encoding='utf-8') as f:
-
-            first_line = f.readline()
-            if first_line.strip():
-                try:
-                    sample_json = json.loads(first_line)
-                    print(f"First sample keys: {list(sample_json.keys())}")
-                    print(f"First sample preview: {json.dumps(sample_json, ensure_ascii=False)[:200]}...")
-                except:
-
-                    f.seek(0)
-                    content = json.load(f)
-                    if isinstance(content, list) and len(content) > 0:
-                        print(f"First sample keys: {list(content[0].keys())}")
-    except Exception as e:
-        print(f"Could not inspect the training query file: {e}")
-    print("-" * 30)
 
     cases = load_cases(args.train_json)
     rank_dict = load_rank_tsv(args.rank_train)
@@ -146,26 +118,11 @@ def main():
 
         count = 0
         error_count = 0
-        debug_skips = 0
-
         for qid in process_qids:
             case = cases[qid]
             cand_ids = rank_dict[qid][:50]
             pos_set = case['la']
 
-
-            if debug_skips < 5:
-                is_skip = False
-                reason = ""
-                if not cand_ids:
-                    is_skip = True; reason = "candidate set is empty"
-                elif not pos_set:
-                    is_skip = True; reason = "positive set is empty; neither 'la' nor 'positives' was parsed"
-
-                if is_skip:
-                    print(f"Skipping QID {qid}: {reason}")
-                    debug_skips += 1
-            # ------------------------------------
 
             if not cand_ids: continue
 

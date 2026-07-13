@@ -42,7 +42,7 @@ def get_args():
     ap.add_argument("--batch_groups", type=int, default=8)
     ap.add_argument("--cutoff", type=int, default=10)
     ap.add_argument("--temp", type=float, default=1.0)
-    ap.add_argument("--debug_samples", type=int, default=5, help="Number of mixed-group rankings to print")
+    ap.add_argument("--debug_samples", type=int, default=0, help="Number of mixed-group rankings to print")
     ap.add_argument("--output_dir", default=None, help="Metrics output directory")
     ap.add_argument("--base_model_path", default=None, help="Base model path required for LoRA adapters")
 

@@ -14,8 +14,6 @@
 
 本仓库是 **RULER** 的官方仓库，对应论文已正式发表于 **SIGIR 2026** 论文集。
 
-> **当前状态。** Stage 1 检索器、数据构造流程、Stage 2 重排器和评估脚本已经公开。模型权重是否发布仍需另行确认。
-
 ## 目录
 
 - [动态](#动态)
@@ -27,7 +25,6 @@
 - [方法](#方法)
 - [实验结果](#实验结果)
 - [数据集](#数据集)
-- [可用资源](#可用资源)
 - [仓库结构](#仓库结构)
 - [核心入口](#核心入口)
 - [许可证](#许可证)
@@ -148,16 +145,6 @@ RULER 在两个中文法律法条检索基准上进行评估：
 
 Hugging Face 数据集页面：[RULER-dataset/RULER](https://huggingface.co/datasets/RULER-dataset/RULER)
 
-## 可用资源
-
-| 组件 | 状态 |
-|---|---|
-| README | 已提供 |
-| 框架图 | 已提供 |
-| 数据集页面 | 已在 Hugging Face 提供 |
-| 训练代码 | 已提供 |
-| 评估脚本 | 已提供 |
-
 ## 仓库结构
 
 当前发布聚焦论文的主要流程：
@@ -166,7 +153,7 @@ Hugging Face 数据集页面：[RULER-dataset/RULER](https://huggingface.co/data
 RULER/
 |-- retriever/                 # 稠密检索与共享 Qwen3 模型
 |-- scripts/                   # 训练、数据构建和评估入口
-|-- docs/                      # 数据与结果说明
+|-- docs/                      # 数据与许可证说明
 |-- tests/                     # 行为测试
 |-- build_train_dataset.py     # Stage 2 分组数据构造
 |-- build_test_dataset.py      # 评估候选构造

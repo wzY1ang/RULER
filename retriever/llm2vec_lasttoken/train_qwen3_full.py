@@ -22,6 +22,19 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+def enable_torch24_dtensor_compat():
+    """Expose Torch 2.4's DTensor at the location expected by Transformers 4.52."""
+    try:
+        from torch.distributed.tensor import DTensor  # noqa: F401
+    except ImportError:
+        from torch.distributed._tensor import DTensor
+        import torch.distributed.tensor as tensor_module
+        import transformers.modeling_utils as modeling_utils
+
+        tensor_module.DTensor = DTensor
+        modeling_utils.DTensor = DTensor
+
+
 @dataclass
 class Args:
     model_name_or_path: str
@@ -33,6 +46,7 @@ class Args:
     per_device_train_batch_size: int = 4
     learning_rate: float = 5e-5
     num_train_epochs: int = 5
+    max_steps: int = -1
     save_strategy: str = "epoch"
     logging_steps: int = 50
     seed: int = 42
@@ -105,6 +119,7 @@ class ContrastiveTrainer(Trainer):
 
 
 def main():
+    enable_torch24_dtensor_compat()
     parser = HfArgumentParser(Args)
     if len(os.sys.argv) == 2 and os.sys.argv[1].endswith(".json"):
         args = parser.parse_json_file(json_file=os.path.abspath(os.sys.argv[1]))[0]
@@ -136,6 +151,7 @@ def main():
         per_device_train_batch_size=args.per_device_train_batch_size,
         learning_rate=args.learning_rate,
         num_train_epochs=args.num_train_epochs,
+        max_steps=args.max_steps,
         save_strategy=args.save_strategy,
         logging_steps=args.logging_steps,
         remove_unused_columns=False,
@@ -151,7 +167,7 @@ def main():
         model=model,
         args=train_args,
         train_dataset=dataset,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         data_collator=collator,
     )
 

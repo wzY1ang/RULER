@@ -1,5 +1,3 @@
-# train_reranker_group_label_ddp.py
-# pip install torch transformers pandas matplotlib peft
 import os, math, argparse, random, time, csv
 from pathlib import Path
 import sys
@@ -163,7 +161,6 @@ def get_args():
     ap.add_argument("--batch_groups", type=int, default=8)
     ap.add_argument("--lr", type=float, default=1e-5)
     ap.add_argument("--weight_decay", type=float, default=1e-4)
-    ap.add_argument("--max_len", type=int, default=512)
     ap.add_argument("--rank_loss", choices=["logistic","hinge"], default="logistic")
     ap.add_argument("--margin", type=float, default=1.0)
     ap.add_argument("--beta_ent", type=float, default=0.2)
@@ -336,4 +333,527 @@ def groupwise_loss(scores, cand_labels, lens, group_labels, *,
                     P_ideal = torch.zeros_like(y, dtype=torch.float32)
                     num_pos = (y == 1).sum().item()
                     if num_pos > 0:
-                        P_×Ýz¶‰žËkºwµçU¹Ñ}ÍÕ´½¹•}É½ÕÁÌ¤¹¥Ñ•´ ¤°(€€€€€€€€€€€€‰9•}5…áM½É”¡µ•…¸¤ˆè€¡µ…áÍ}ÍÕ´½¹•}É½ÕÁÌ¤¹¥Ñ•´ ¤°(€€€€€€€€€€€€‰9•É½ÕÁÌˆè¥¹Ð¡¹•}É½ÕÁÌ¹¥Ñ•´ ¤¤(€€€€€€€ô¤(((€€€¥˜Ý…Í}ÑÉ…¥¹¥¹œè(€€€€€€€µ½‘•°¹ÑÉ…¥¸ ¤((€€€É•ÑÕÉ¸µ•ÑÉ¥Ì()Ñ½É ¹¹½}É… ¤)‘•˜}±½}É…Ý}Í½É•Ì¡D°°d°±•¹Ì°Í½É•Ì°ÍÑ•À°•Á½ ¤è(€€€€ˆˆˆ(€€€MÕµµ…É¥é”Í½É•Ì™½Èµ¥á•…¹…±°µ¹•…Ñ¥Ù”É½ÕÁÌ¸(€€€€ˆˆˆ(€€€Í½É•Ì€ôÍ½É•Ì¹‘•Ñ…  ¤¹ÁÔ ¤(€€€e}ÁÔ€€ôd¹ÁÔ ¤(€€€½™˜€ô€À(€€€Á½Í}É½ÕÁÌ°¹•}É½ÕÁÌ€ô€À°€À(€€€Á½Í}Í½É•Ì°¹•}Í½É•Ì€ômt°mt(€€€ÁÕÉ•}¹•}Í½É•Ì€ômt((€€€™½È0¥¸±•¹Ìè(€€€€€€€ÉÁ}Ì€ôÍ½É•Ím½™˜é½™˜­1t(€€€€€€€ÉÁ}ä€ôe}ÁÕm½™˜é½™˜­1t(€€€€€€€¥˜€¡ÉÁ}ä€ôô€Ä¤¹…¹ä ¤è(€€€€€€€€€€€Á½Í}É½ÕÁÌ€¬ô€Ä(€€€€€€€€€€€Á½Í}Í½É•Ì¹•áÑ•¹¡ÉÁ}ÍmÉÁ}ä€ôô€Åt¹Ñ½±¥ÍÐ ¤¤(€€€€€€€€€€€¹•}Í½É•Ì¹•áÑ•¹¡ÉÁ}ÍmÉÁ}ä€ôô€Át¹Ñ½±¥ÍÐ ¤¤(€€€€€€€•±Í”è(€€€€€€€€€€€¹•}É½ÕÁÌ€¬ô€Ä(€€€€€€€€€€€ÁÕÉ•}¹•}Í½É•Ì¹•áÑ•¹¡ÉÁ}Ì¹Ñ½±¥ÍÐ ¤¤(€€€€€€€½™˜€¬ô0(((€€€ÁÉ¥¹Ð¡˜‰mMÑ•ÀíÍÑ•Áõt€€ˆ(€€€€€€€€€˜‰A½ÍÉ½ÕÁÌõíÁ½Í}É½ÕÁÍô€€ˆ(€€€€€€€€€˜‰A½ÍM½É•ÌõíÁ½Í}Í½É•Íô€€ˆ(€€€€€€€€€˜‰9•M½É•Ìõí¹•}Í½É•Íô€ð€€ˆ(€€€€€€€€€˜‰9•É½ÕÁÌõí¹•}É½ÕÁÍô€€ˆ(€€€€€€€€€˜‰AÕÉ•9•M½É•ÌõíÁÕÉ•}¹•}Í½É•Íôˆ¤((Œ€´´´´´´´´´´´´´´´´µ…¥¸€´´´´´´´´´´´´´´´´)‘•˜µ…¥¸ ¤è(€€€…ÉÌ€ô•Ñ}…ÉÌ ¤(€€€É…¹¬°Ý½É±‘}Í¥é”°±½…±}É…¹¬€ôÍ•ÑÕÁ}‘‘À ¤(€€€‘•Ù¥”€ôÑ½É ¹‘•Ù¥”¡˜‰Õ‘„éí±½…±}É…¹­ôˆ¥˜Ñ½É ¹Õ‘„¹¥Í}…Ù…¥±…‰±” ¤•±Í”€‰ÁÔˆ¤(€€€¥˜¥Í}µ…¥¸¡É…¹¬¤è½Ì¹µ…­•‘¥ÉÌ¡…ÉÌ¹½ÕÑ}‘¥È°•á¥ÍÑ}½¬õQÉÕ”¤(€€€‰…ÉÉ¥•È ¤(((€€€±½•È€ôQÉ…¥¹1½•È¡…ÉÌ¹½ÕÑ}‘¥È°•¹…‰±”õ¥Í}µ…¥¸¡É…¹¬¤¤((€€€¥˜¥Í}µ…¥¸¡É…¹¬¤è(€€€€€€€ÁÉ¥¹Ð ˆôˆ¨ØÀ¤(€€€€€€€ÁÉ¥¹Ð ‰QÉ…¥¹¥¹œ½¹™¥ÕÉ…Ñ¥½¸€¡@¤èˆ¤(€€€€€€€ÁÉ¥¹Ð¡˜ˆ€]½É±Í¥é”èíÝ½É±‘}Í¥é•ôðI…¹¬èíÉ…¹­ôð1½…°É…¹¬èí±½…±}É…¹­ôˆ¤(€€€€€€€ÁÉ¥¹Ð¡˜ˆ€5½‘•°èí…ÉÌ¹µ½‘•±}Á…Ñ¡ôˆ¤(€€€€€€€ÁÉ¥¹Ð¡˜ˆ€…Ñ„èí…ÉÌ¹ÑÍÙôˆ¤(€€€€€€€ÁÉ¥¹Ð¡˜ˆ€=ÕÑÁÕÐèí…ÉÌ¹½ÕÑ}‘¥Éôˆ¤(€€€€€€€ÁÉ¥¹Ð¡˜ˆ€Á½¡Ìèí…ÉÌ¹•Á½¡Íôð	…Ñ É½ÕÁÌ½ATèí…ÉÌ¹‰…Ñ¡}É½ÕÁÍôˆ¤(€€€€€€€ÁÉ¥¹Ð¡˜ˆ€1Hèí…ÉÌ¹±Éôð]•¥¡Ð‘•…äèí…ÉÌ¹Ý•¥¡Ñ}‘•…åôˆ¤(€€€€€€€ÁÉ¥¹Ð¡˜ˆ€I…¹¬±½ÍÌèí…ÉÌ¹É…¹­}±½ÍÍôð5…É¥¸èí…ÉÌ¹µ…É¥¹ôˆ¤(€€€€€€€ÁÉ¥¹Ð¡˜ˆ€	•Ñ„•¹Ðèí…ÉÌ¹‰•Ñ…}•¹ÑôðQ•µÀèí…ÉÌ¹Ñ•µÁôˆ¤(€€€€€€€ÁÉ¥¹Ð¡˜ˆ€5…àÁ…¥ÉÌèí…ÉÌ¹µ…á}Á…¥ÉÍôðÉ…±¥Àèí…ÉÌ¹É…‘}±¥Áôˆ¤(€€€€€€€ÁÉ¥¹Ð¡˜ˆ€]…ÉµÕÀÉ…Ñ¥¼èí…ÉÌ¹Ý…ÉµÕÁ}É…Ñ¥½ôðM••èí…ÉÌ¹Í••‘ôˆ¤(€€€€€€€ÁÉ¥¹Ð¡˜ˆ€Å}µ…àèí…ÉÌ¹Å}µ…áôð‘}µ…àèí…ÉÌ¹‘}µ…áôˆ¤(€€€€€€€ÁÉ¥¹Ð¡˜ˆ€±Á¡„èí…ÉÌ¹…±Á¡…ôð…µµ„èí…ÉÌ¹…µµ…ôð	•Ñ…}%Ièí…ÉÌ¹‰•Ñ…}%Iôˆ¤(((€€€€€€€¥˜…ÉÌ¹ÕÍ•}±½É„è(€€€€€€€€€€€ÁÉ¥¹Ð¡˜ˆ€1½Iè¹…‰±•ðÈèí…ÉÌ¹±½É…}Éôð…±Á¡„èí…ÉÌ¹±½É…}…±Á¡…ôð‘É½Á½ÕÐèí…ÉÌ¹±½É…}‘É½Á½ÕÑôˆ¤(€€€€€€€€€€€ÁÉ¥¹Ð¡˜ˆ€Q…É•Ðµ½‘Õ±•Ìèí…ÉÌ¹Ñ…É•Ñ}µ½‘Õ±•Íôˆ¤(€€€€€€€•±Í”è(€€€€€€€€€€€ÁÉ¥¹Ð¡˜ˆ€1½Iè¥Í…‰±•ˆ¤(€€€€€€€ÁÉ¥¹Ð ˆôˆ¨ØÀ¤(((€€€¥˜¥Í}µ…¥¸¡É…¹¬¤è(€€€€€€€ÁÉ¥¹Ð¡˜‰m%9=tM•ÑÑ¥¹œµ½‘•°¥¹¥Ñ¥…±¥é…Ñ¥½¸Í••Ñ¼í…ÉÌ¹Í••‘ô™½È…±°É…¹­Ìˆ¤(((€€€Ñ½É ¹µ…¹Õ…±}Í••¡…ÉÌ¹Í••¤(€€€Ñ½É ¹Õ‘„¹µ…¹Õ…±}Í••‘}…±°¡…ÉÌ¹Í••¤(€€€¹À¹É…¹‘½´¹Í••¡…ÉÌ¹Í••¤(€€€É…¹‘½´¹Í••¡…ÉÌ¹Í••¤(((€€€Ñ½¬€ôÕÑ½Q½­•¹¥é•È¹™É½µ}ÁÉ•ÑÉ…¥¹•¡…ÉÌ¹µ½‘•±}Á…Ñ ¤(((€€€µ½‘•°€ôEÝ•¸Í½Éµ‰•‘‘¥¹œ¹™É½µ}ÁÉ•ÑÉ…¥¹•¡…ÉÌ¹µ½‘•±}Á…Ñ ¤(((€€€¥˜…ÉÌ¹É…‘}¡•­Á½¥¹Ðè(€€€€€€€ÁÉ¥¹Ð ‰m%9=t¹…‰±¥¹œÉ…‘¥•¹Ð¡•­Á½¥¹Ñ¥¹œÑ¼Í…Ù”µ•µ½Éä¸¸¸ˆ¤((((€€€€€€€ÑÉäè(€€€€€€€€€€€µ½‘•°¹É…‘¥•¹Ñ}¡•­Á½¥¹Ñ¥¹}•¹…‰±” ¤(€€€€€€€•á•ÁÐY…±Õ•ÉÉ½Èè((€€€€€€€€€€€¥˜¡…Í…ÑÑÈ¡µ½‘•°°€‰µ½‘•°ˆ¤è(€€€€€€€€€€€€€€€µ½‘•°¹µ½‘•°¹É…‘¥•¹Ñ}¡•­Á½¥¹Ñ¥¹}•¹…‰±” ¤((€€€€€€€€€€€€€€€¥˜¡…Í…ÑÑÈ¡µ½‘•°°€‰½¹™¥œˆ¤è(€€€€€€€€€€€€€€€€€€€µ½‘•°¹½¹™¥œ¹É…‘¥•¹Ñ}¡•­Á½¥¹Ñ¥¹œ€ôQÉÕ”(€€€€€€€€€€€•±Í”è((€€€€€€€€€€€€€€€ÁÉ¥¹Ð ‰m]I9t½É¥¹œÍÕÁÁ½ÉÑÍ}É…‘¥•¹Ñ}¡•­Á½¥¹Ñ¥¹œõQÉÕ”ˆ¤(€€€€€€€€€€€€€€€µ½‘•°¹ÍÕÁÁ½ÉÑÍ}É…‘¥•¹Ñ}¡•­Á½¥¹Ñ¥¹œ€ôQÉÕ”(€€€€€€€€€€€€€€€µ½‘•°¹É…‘¥•¹Ñ}¡•­Á½¥¹Ñ¥¹}•¹…‰±” ¤(((€€€€€€€¥˜¡…Í…ÑÑÈ¡µ½‘•°°€‰½¹™¥œˆ¤è(€€€€€€€€€€€µ½‘•°¹½¹™¥œ¹ÕÍ•}…¡”€ô…±Í”(((€€€€€€€¥˜…ÉÌ¹ÕÍ•}±½É„è(€€€€€€€€€€€¥˜¡…Í…ÑÑÈ¡µ½‘•°°€‰•¹…‰±•}¥¹ÁÕÑ}É•ÅÕ¥É•}É…‘Ìˆ¤è(€€€€€€€€€€€€€€€µ½‘•°¹•¹…‰±•}¥¹ÁÕÑ}É•ÅÕ¥É•}É…‘Ì ¤(€€€€€€€€€€€•±Í”è(€€€€€€€€€€€€€€€‘•˜µ…­•}¥¹ÁÕÑÍ}É•ÅÕ¥É•}É…¡µ½‘Õ±”°¥¹ÁÕÐ°½ÕÑÁÕÐ¤è(€€€€€€€€€€€€€€€€€€€½ÕÑÁÕÐ¹É•ÅÕ¥É•Í}É…‘|¡QÉÕ”¤(€€€€€€€€€€€€€€€µ½‘•°¹•Ñ}¥¹ÁÕÑ}•µ‰•‘‘¥¹Ì ¤¹É•¥ÍÑ•É}™½ÉÝ…É‘}¡½½¬¡µ…­•}¥¹ÁÕÑÍ}É•ÅÕ¥É•}É…¤(€€€€Œ€ôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôôô((((€€€¥˜¡…Í…ÑÑÈ¡µ½‘•°°€‰Í½É•}¡•…ˆ¤è(€€€€€€€Ñ½É ¹µ…¹Õ…±}Í••¡…ÉÌ¹Í••¤(€€€€€€€Ý¥Ñ Ñ½É ¹¹½}É… ¤è(€€€€€€€€€€€µ½‘•°¹Í½É•}¡•…¹Ý•¥¡Ð¹é•É½| ¤((€€€€€€€€€€€¹¸¹¥¹¥Ð¹¹½Éµ…±|¡µ½‘•°¹Í½É•}¡•…¹Ý•¥¡Ð°µ•…¸ôÀ¸À°ÍÑôÀ¸ÀÄ¤(€€€€€€€€€€€¥˜µ½‘•°¹Í½É•}¡•…¹‰¥…Ì¥Ì¹½Ð9½¹”è(€€€€€€€€€€€€€€€¹¸¹¥¹¥Ð¹é•É½Í|¡µ½‘•°¹Í½É•}¡•…¹‰¥…Ì¤(((€€€€€€€µ½‘•°¹Í½É•}¡•…¹Ý•¥¡Ð¹É•ÅÕ¥É•Í}É…€ôQÉÕ”(€€€€€€€¥˜µ½‘•°¹Í½É•}¡•…¹‰¥…Ì¥Ì¹½Ð9½¹”è(€€€€€€€€€€€µ½‘•°¹Í½É•}¡•…¹‰¥…Ì¹É•ÅÕ¥É•Í}É…€ôQÉÕ”(((€€€¥˜…ÉÌ¹ÕÍ•}±½É„è(€€€€€€€±½É…}½¹™¥œ€ô1½É…½¹™¥œ (€€€€€€€€€€€Ñ…Í­}ÑåÁ”õQ…Í­QåÁ”¹QUI}aQIQ%=8°(€€€€€€€€€€€Èõ…ÉÌ¹±½É…}È°(€€€€€€€€€€€±½É…}…±Á¡„õ…ÉÌ¹±½É…}…±Á¡„°(€€€€€€€€€€€Ñ…É•Ñ}µ½‘Õ±•Ìõ…ÉÌ¹Ñ…É•Ñ}µ½‘Õ±•Ì°(€€€€€€€€€€€±½É…}‘É½Á½ÕÐõ…ÉÌ¹±½É…}‘É½Á½ÕÐ°(€€€€€€€€€€€‰¥…Ìô‰¹½¹”ˆ°(€€€€€€€€€€€µ½‘Õ±•Í}Ñ½}Í…Ù”õl‰Í½É•}¡•…‰t(€€€€€€€€¤((€€€€€€€µ½‘•°€ô•Ñ}Á•™Ñ}µ½‘•°¡µ½‘•°°±½É…}½¹™¥œ¤((€€€€€€€¥˜¥Í}µ…¥¸¡É…¹¬¤è(€€€€€€€€€€€µ½‘•°¹ÁÉ¥¹Ñ}ÑÉ…¥¹…‰±•}Á…É…µ•Ñ•ÉÌ ¤(((€€€ÑÉäè(€€€€€€€µ½‘•°¹µ½‘•°¹½¹™¥œ¹…ÑÑ¹}¥µÁ±•µ•¹Ñ…Ñ¥½¸€ô€‰Í‘Á„ˆ(€€€•á•ÁÐá•ÁÑ¥½¸è(€€€€€€€Á…ÍÌ(((€€€¥˜¥Í}µ…¥¸¡É…¹¬¤è((€€€€€€€¡•…€ô9½¹”(€€€€€€€¥˜¡…Í…ÑÑÈ¡µ½‘•°°€‰Í½É•}¡•…ˆ¤è(€€€€€€€€€€€¡•…€ôµ½‘•°¹Í½É•}¡•…(€€€€€€€•±¥˜¡…Í…ÑÑÈ¡µ½‘•°°€‰µ½‘Õ±”ˆ¤…¹¡…Í…ÑÑÈ¡µ½‘•°¹µ½‘Õ±”°€‰Í½É•}¡•…ˆ¤è(€€€€€€€€€€€¡•…€ôµ½‘•°¹µ½‘Õ±”¹Í½É•}¡•…(€€€€€€€•±¥˜¡…Í…ÑÑÈ¡µ½‘•°°€‰‰…Í•}µ½‘•°ˆ¤…¹¡…Í…ÑÑÈ¡µ½‘•°¹‰…Í•}µ½‘•°°€‰Í½É•}¡•…ˆ¤è(€€€€€€€€€€€¡•…€ôµ½‘•°¹‰…Í•}µ½‘•°¹Í½É•}¡•…((€€€€€€€¥˜¡•…¥Ì¹½Ð9½¹”è(€€€€€€€€€€€ÁÉ¥¹Ð¡˜‰m¡•­tÍ½É•}¡•…¥¹¥Ñ¥…±¥é•¸]•¥¡ÐÍÑèí¡•…¹Ý•¥¡Ð¹‘…Ñ„¹ÍÑ ¤¹¥Ñ•´ ¤è¸Ù™ôˆ¤((€€€Í•Ñ}Í••¡…ÉÌ¹Í••€¬É…¹¬¤((€€€µ½‘•°¹Ñ¼¡‘•Ù¥”¤((€€€¥˜¥Í}µ…¥¸¡É…¹¬¤è(€€€€€€€ÁÉ¥¹Ð ‰q¹m	Ut5½‘•°Á…É…µ•Ñ•ÉÌ€¡™½ÕÌ½¸Í½É”¡•…€˜1½I¤èˆ¤(€€€€€€€™½È¹…µ”°Á…É…´¥¸µ½‘•°¹¹…µ•‘}Á…É…µ•Ñ•ÉÌ ¤è(€€€€€€€€€€€¥˜€‰Í½É”ˆ¥¸¹…µ”½È€‰¡•…ˆ¥¸¹…µ”½È€‰±…ÍÍ¥™¥•Èˆ¥¸¹…µ”½È€‰±µ}¡•…ˆ¥¸¹…µ”½È€‰±½É…|ˆ¥¸¹…µ”¹±½Ý•È ¤è(€€€€€€€€€€€€€€€ÁÉ¥¹Ð¡˜ˆ€í¹…µ•ôèÉ•ÅÕ¥É•Í}É…õíÁ…É…´¹É•ÅÕ¥É•Í}É…‘ô°µ•…¸õíÁ…É…´¹‘…Ñ„¹µ•…¸ ¤¹¥Ñ•´ ¤è¸Ù™ô°ÍÑõíÁ…É…´¹‘…Ñ„¹ÍÑ ¤¹¥Ñ•´ ¤è¸Ù™ôˆ¤(€€€€€€€ÁÉ¥¹Ð ¤(((€€€µ½‘•°€ôÑ½É ¹¹¸¹Á…É…±±•°¹¥ÍÑÉ¥‰ÕÑ•‘…Ñ…A…É…±±•° (€€€€€€€µ½‘•°°‘•Ù¥•}¥‘Ìõm±½…±}É…¹­t°½ÕÑÁÕÑ}‘•Ù¥”õ±½…±}É…¹¬°™¥¹‘}Õ¹ÕÍ•‘}Á…É…µ•Ñ•ÉÌõ…±Í”(€€€€¤(((€€€µ½‘•°¹ÑÉ…¥¸ ¤((€€€‘Ì€ôÉ½ÕÁ…Ñ…Í•Ð¡…ÉÌ¹ÑÍØ¤(€€€¸€ô±•¸¡‘Ì¤ìÍÁ±¥Ð€ô¥¹Ð À¸ä©¸¤(€€€¥˜¥Í}µ…¥¸¡É…¹¬¤èÁÉ¥¹Ð¡˜‰…Ñ…Í•Ðèí¹ôÉ½ÕÁÌ€¡ÑÉ…¥¸èíÍÁ±¥Ñô°Ù…±¥èí¸µÍÁ±¥Ñô¤ˆ¤((€€€ÑÉ…¥¹}ÍÕ‰Í•Ð€ôÑ½É ¹ÕÑ¥±Ì¹‘…Ñ„¹MÕ‰Í•Ð¡‘Ì°±¥ÍÐ¡É…¹”¡ÍÁ±¥Ð¤¤¤(€€€Ù…±¥‘}ÍÕ‰Í•Ð€ôÑ½É ¹ÕÑ¥±Ì¹‘…Ñ„¹MÕ‰Í•Ð¡‘Ì°±¥ÍÐ¡É…¹”¡ÍÁ±¥Ð°¸¤¤¤((€€€ÑÉ…¥¹}Í…µÁ±•È€ô¥ÍÑÉ¥‰ÕÑ•‘M…µÁ±•È¡ÑÉ…¥¹}ÍÕ‰Í•Ð°¹Õµ}É•Á±¥…ÌõÝ½É±‘}Í¥é”°É…¹¬õÉ…¹¬°Í¡Õ™™±”õ…±Í”°‘É½Á}±…ÍÐõ…±Í”¤(€€€Ù…±¥‘}Í…µÁ±•È€ô¥ÍÑÉ¥‰ÕÑ•‘M…µÁ±•È¡Ù…±¥‘}ÍÕ‰Í•Ð°¹Õµ}É•Á±¥…ÌõÝ½É±‘}Í¥é”°É…¹¬õÉ…¹¬°Í¡Õ™™±”õ…±Í”°‘É½Á}±…ÍÐõ…±Í”¤((€€€ÑÉ}±€ô…Ñ…1½…‘•È¡ÑÉ…¥¹}ÍÕ‰Í•Ð°‰…Ñ¡}Í¥é”õ…ÉÌ¹‰…Ñ¡}É½ÕÁÌ°Í…µÁ±•ÈõÑÉ…¥¹}Í…µÁ±•È°½±±…Ñ•}™¸õ½±±…Ñ•}É½ÕÁÌ¤(€€€Ù…}±€ô…Ñ…1½…‘•È¡Ù…±¥‘}ÍÕ‰Í•Ð°‰…Ñ¡}Í¥é”õ…ÉÌ¹‰…Ñ¡}É½ÕÁÌ°Í…µÁ±•ÈõÙ…±¥‘}Í…µÁ±•È°½±±…Ñ•}™¸õ½±±…Ñ•}É½ÕÁÌ¤((€€€½ÁÑ¥´€ôÑ½É ¹½ÁÑ¥´¹‘…µ\¡µ½‘•°¹Á…É…µ•Ñ•ÉÌ ¤°±Èõ…ÉÌ¹±È°Ý•¥¡Ñ}‘•…äõ…ÉÌ¹Ý•¥¡Ñ}‘•…ä¤((€€€ÍÑ•ÁÍ}Á•É}•Á½ €ô±•¸¡ÑÉ}±¤(€€€½µÁÕÑ•‘}Ñ½Ñ…±}ÍÑ•ÁÌ€ô…ÉÌ¹•Á½¡Ì€¨ÍÑ•ÁÍ}Á•É}•Á½ ((€€€¥˜…ÉÌ¹µ…á}ÍÑ•ÁÌ€ø€Àè(€€€€€€€Ñ½Ñ…±}ÍÑ•ÁÌ€ô…ÉÌ¹µ…á}ÍÑ•ÁÌ(((€€€€€€€¥˜Ñ½Ñ…±}ÍÑ•ÁÌ€ð½µÁÕÑ•‘}Ñ½Ñ…±}ÍÑ•ÁÌè(€€€€€€€€€€€€¥˜¥Í}µ…¥¸¡É…¹¬¤è(€€€€€€€€€€€€€€€€ÁÉ¥¹Ð¡˜‰m%¹™½t=Ù•ÉÉ¥‘¥¹œÑ½Ñ…±}ÍÑ•ÁÌ™É½´í½µÁÕÑ•‘}Ñ½Ñ…±}ÍÑ•ÁÍôÑ¼íÑ½Ñ…±}ÍÑ•ÁÍô‘Õ”Ñ¼€´µµ…á}ÍÑ•ÁÌˆ¤(€€€•±Í”è(€€€€€€€Ñ½Ñ…±}ÍÑ•ÁÌ€ô½µÁÕÑ•‘}Ñ½Ñ…±}ÍÑ•ÁÌ((€€€Ý…Éµ}ÍÑ•ÁÌ€ô¥¹Ð¡Ñ½Ñ…±}ÍÑ•ÁÌ€¨…ÉÌ¹Ý…ÉµÕÁ}É…Ñ¥¼¤(€€€Í¡•€ô•Ñ}±¥¹•…É}Í¡•‘Õ±•}Ý¥Ñ¡}Ý…ÉµÕÀ¡½ÁÑ¥´°Ý…Éµ}ÍÑ•ÁÌ°Ñ½Ñ…±}ÍÑ•ÁÌ¤(€€€Í…±•È€ôÑ½É ¹…µÀ¹É…‘M…±•È Õ‘„œ°•¹…‰±•õQÉÕ”¤((€€€‰•ÍÑ}¹‘œ€ô€´Ä¸À(€€€‰•ÍÑ}‘¥È€ô½Ì¹Á…Ñ ¹©½¥¸¡…ÉÌ¹½ÕÑ}‘¥È°€‰‰•ÍÐˆ¤ì±…ÍÑ}‘¥È€ô½Ì¹Á…Ñ ¹©½¥¸¡…ÉÌ¹½ÕÑ}‘¥È°€‰±…ÍÐˆ¤(€€€¥˜¥Í}µ…¥¸¡É…¹¬¤è(€€€€€€€½Ì¹µ…­•‘¥ÉÌ¡‰•ÍÑ}‘¥È°•á¥ÍÑ}½¬õQÉÕ”¤ì½Ì¹µ…­•‘¥ÉÌ¡±…ÍÑ}‘¥È°•á¥ÍÑ}½¬õQÉÕ”¤((€€€ÍÑ•ÁÍ}‘½¹”€ô€Àì•µ…}ÍÑ•Á}Í•Œ€ô9½¹”ìÍÑ•À€ô€ÀìÉÕ¹}±½ÍÌ€ô€À¸À(€€€ÍÑ…ÉÑ}Ñ¥µ”€ôÑ¥µ”¹Ñ¥µ” ¤((€€€ÍÑ½Á}ÑÉ…¥¹¥¹œ€ô…±Í”(((€€€M=I}1=}YId€ôµ…à Ä°…ÉÌ¹±½}ÍÑ•ÁÌ€¼¼€È¤((€€€™½È•À¥¸É…¹” Ä°…ÉÌ¹•Á½¡Ì¬Ä¤è(€€€€€€€¥˜ÍÑ½Á}ÑÉ…¥¹¥¹œè‰É•…¬(((€€€€€€€µ½‘•°¹ÑÉ…¥¸ ¤(€€€€€€€ÑÉ…¥¹}Í…µÁ±•È¹Í•Ñ}•Á½ ¡•À¤(€€€€€€€•Á}ÍÑ…ÉÐ€ôÑ¥µ”¹Ñ¥µ” ¤((€€€€€€€™½ÈD°°d°±•¹Ì°É½ÕÁ}±…‰•±Ì¥¸ÑÉ}±è(€€€€€€€€€€€¥˜…ÉÌ¹µ…á}ÍÑ•ÁÌ€ø€À…¹ÍÑ•À€øô…ÉÌ¹µ…á}ÍÑ•ÁÌè(€€€€€€€€€€€€€€€ÍÑ½Á}ÑÉ…¥¹¥¹œ€ôQÉÕ”(€€€€€€€€€€€€€€€‰É•…¬(€€€€€€€€€€€ÐÀ€ôÑ¥µ”¹Ñ¥µ” ¤((€€€€€€€€€€€•¹Œ€ô•¹½‘•}Á…¥ÉÍ}ÍÁ±¥Ñ}ÑÉÕ¹Œ¡Ñ½¬°D°°Å}µ…àõ…ÉÌ¹Å}µ…à°‘}µ…àõ…ÉÌ¹‘}µ…à°‘•Ù¥”õ‘•Ù¥”¤(€€€€€€€€€€€Ý¥Ñ Ñ½É ¹…µÀ¹…ÕÑ½…ÍÐ Õ‘„œ°‘ÑåÁ”õÑ½É ¹‰™±½…ÐÄØ¤è(€€€€€€€€€€€€€€€½ÕÐ€ôµ½‘•°¡•¹l‰¥¹ÁÕÑ}¥‘Ì‰t°•¹l‰…ÑÑ•¹Ñ¥½¹}µ…Í¬‰t¹±½¹œ ¤°µ½‘”ô‰É•É…¹¬ˆ¤(€€€€€€€€€€€€€€€Í½É•Ì€ôÑ½É ¹¹…¹}Ñ½}¹Õ´¡½ÕÑl‰Í½É•Ì‰t¹ÍÅÕ••é” ´Ä¤°¹…¸ô´Å”ä¤(€€€€€€€€€€€€€€€±½ÍÌ€ôÉ½ÕÁÝ¥Í•}±½ÍÌ¡Í½É•Ì°d¹Ñ¼¡‘•Ù¥”¤°±•¹Ì°É½ÕÁ}±…‰•±Ì¹Ñ¼¡‘•Ù¥”¤°(€€€€€€€€€€€€€€€€€€€€€É…¹­}±½ÍÌõ…ÉÌ¹É…¹­}±½ÍÌ°µ…É¥¸õ…ÉÌ¹µ…É¥¸°(€€€€€€€€€€€€€€€€€€€€€…±Á¡„õ…ÉÌ¹…±Á¡„°…µµ„õ…ÉÌ¹…µµ„°(€€€€€€€€€€€€€€€€€€€€€‰•Ñ…}•¹Ðõ…ÉÌ¹‰•Ñ…}•¹Ð°Põ…ÉÌ¹Ñ•µÀ°(€€€€€€€€€€€€€€€€€€€€€µ…á}Á…¥ÉÌõ…ÉÌ¹µ…á}Á…¥ÉÌ°‘•Ù¥”õ‘•Ù¥”°(€€€€€€€€€€€€€€€€€€€€€‰•Ñ…}%Iõ…ÉÌ¹‰•Ñ…}%I¤(€€€€€€€€€€€Í…±•È¹Í…±”¡±½ÍÌ¤¹‰…­Ý…É ¤(((€€€€€€€€€€€Í…±•È¹Õ¹Í…±•|¡½ÁÑ¥´¤((€€€€€€€€€€€É…‘}¹½É´€ôÑ½É ¹Ñ•¹Í½È À¸À°‘•Ù¥”õ‘•Ù¥”¤(€€€€€€€€€€€¥˜¥Í}µ…¥¸¡É…¹¬¤è((€€€€€€€€€€€€€€€É…‘Ì€ômÀ¹É…¹‘•Ñ…  ¤™½ÈÀ¥¸µ½‘•°¹Á…É…µ•Ñ•ÉÌ ¤¥˜À¹É…¥Ì¹½Ð9½¹•t(€€€€€€€€€€€€€€€¥˜É…‘Ìè(€€€€€€€€€€€€€€€€€€€É…‘}¹½É´€ôÑ½É ¹¹½É´¡Ñ½É ¹ÍÑ…¬¡mÑ½É ¹¹½É´¡œ°€È¤™½Èœ¥¸É…‘Ít¤°€È¤(((€€€€€€€€€€€¹¸¹ÕÑ¥±Ì¹±¥Á}É…‘}¹½Éµ|¡µ½‘•°¹Á…É…µ•Ñ•ÉÌ ¤°…ÉÌ¹É…‘}±¥À¤((€€€€€€€€€€€Í…±•È¹ÍÑ•À¡½ÁÑ¥´¤ìÍ…±•È¹ÕÁ‘…Ñ” ¤ìÍ¡•¹ÍÑ•À ¤(€€€€€€€€€€€½ÁÑ¥´¹é•É½}É…¡Í•Ñ}Ñ½}¹½¹”õQÉÕ”¤((€€€€€€€€€€€±½ÍÍ}‘•Ñ…¡•€ô™±½…Ð¡±½ÍÌ¹‘•Ñ…  ¤¤(€€€€€€€€€€€ÉÕ¹}±½ÍÌ€¬ô±½ÍÍ}‘•Ñ…¡•ìÍÑ•À€¬ô€ÄìÍÑ•ÁÍ}‘½¹”€¬ô€Ä(((€€€€€€€€€€€¥˜¥Í}µ…¥¸¡É…¹¬¤…¹ÍÑ•À€”M=I}1=}YId€ôô€Àè(€€€€€€€€€€€€€€€}±½}É…Ý}Í½É•Ì¡D°°d°±•¹Ì°Í½É•Ì°ÍÑ•À°•À¤((€€€€€€€€€€€ÍÑ•Á}Í•Œ€ôÑ¥µ”¹Ñ¥µ” ¤€´ÐÀ(€€€€€€€€€€€¥˜•µ…}ÍÑ•Á}Í•Œ¥Ì9½¹”è•µ…}ÍÑ•Á}Í•Œ€ôÍÑ•Á}Í•Œ(€€€€€€€€€€€•±Í”è•µ…}ÍÑ•Á}Í•Œ€ô€À¸ä©•µ…}ÍÑ•Á}Í•Œ€¬€À¸Ä©ÍÑ•Á}Í•Œ(€€€€€€€€€€€•Ñ…}Í•Œ€ôµ…à À¸À°€¡Ñ½Ñ…±}ÍÑ•ÁÌµÍÑ•ÁÍ}‘½¹”¤€¨•µ…}ÍÑ•Á}Í•Œ¤((€€€€€€€€€€€¥˜¥Í}µ…¥¸¡É…¹¬¤…¹ÍÑ•À€”…ÉÌ¹±½}ÍÑ•ÁÌ€ôô€Àè(€€€€€€€€€€€€€€€…Ù}±•¸°µ…á}•™™}±•¸°Á…‘}±•¸€ôÍ•Å}±•¹}ÍÑ…ÑÌ¡•¹l‰…ÑÑ•¹Ñ¥½¹}µ…Í¬‰t¤(€€€€€€€€€€€€€€€…Ù}Á½Ì°…Ù}¹•œ°…Ù}Á…¥ÉÌ€ô‰…Ñ¡}ÍÑ…ÑÌ¡d°±•¹Ì°…ÉÌ¹µ…á}Á…¥ÉÌ¤(€€€€€€€€€€€€€€€¥˜Ñ½É ¹Õ‘„¹¥Í}…Ù…¥±…‰±” ¤è(€€€€€€€€€€€€€€€€€€€…±±½Œ€ôÑ½É ¹Õ‘„¹µ•µ½Éå}…±±½…Ñ•¡‘•Ù¥”¤€¼€ ÄÀÈÐ¨¨Ì¤(€€€€€€€€€€€€€€€€€€€É•Í•ÉÙ•€ôÑ½É ¹Õ‘„¹µ•µ½Éå}É•Í•ÉÙ•¡‘•Ù¥”¤€¼€ ÄÀÈÐ¨¨Ì¤(€€€€€€€€€€€€€€€€€€€µ•µ}¥¹™¼€ô˜‰AUí±½…±}É…¹­ôµ•´…±±½Œ½É•ÍØèí…±±½Œè¸Å™õ½íÉ•Í•ÉÙ•è¸Å™õˆ(€€€€€€€€€€€€€€€•±Í”è(€€€€€€€€€€€€€€€€€€€…±±½Œ€ôÉ•Í•ÉÙ•€ô€À¸À(€€€€€€€€€€€€€€€€€€€µ•µ}¥¹™¼€ô€‰ATµ•´è8½ˆ(€€€€€€€€€€€€€€€ÕÉÉ•¹Ñ}±È€ôÍ¡•¹•Ñ}±…ÍÑ}±È ¥lÁt((€€€€€€€€€€€€€€€É…‘}¹½Éµ}ÁÔ€ô™±½…Ð¡É…‘}¹½É´¹¥Ñ•´ ¤¤¥˜¥Í}µ…¥¸¡É…¹¬¤•±Í”€À¸À((€€€€€€€€€€€€€€€ÁÉ¥¹Ð (€€€€€€€€€€€€€€€€€€€˜‰m5…¥¹t•Àí•ÁôÍÑ•ÀíÍÑ•Áô½íÑ½Ñ…±}ÍÑ•ÁÍô€ˆ(€€€€€€€€€€€€€€€€€€€˜‰±½ÍÌõíÉÕ¹}±½ÍÌ½…ÉÌ¹±½}ÍÑ•ÁÌè¸Ñ™ô±ÈõíÕÉÉ•¹Ñ}±Èè¸É•ô€ˆ(€€€€€€€€€€€€€€€€€€€˜‰É…‘}¹½É´õíÉ…‘}¹½Éµ}ÁÔè¸Ñ™ô€ˆ(€€€€€€€€€€€€€€€€€€€˜‰ðÍ•Å}±•¸…Ùœ½µ…à½Á…õí…Ù}±•¸è¸Å™ô½íµ…á}•™™}±•¹ô½íÁ…‘}±•¹ô€ˆ(€€€€€€€€€€€€€€€€€€€˜‰ðÉÀ…ÙœÁ½Ì½¹•œõí…Ù}Á½Ìè¸Å™ô½í…Ù}¹•œè¸Å™ôÁ…¥ÉÍùí…Ù}Á…¥ÉÌè¸Á™ô€ˆ(€€€€€€€€€€€€€€€€€€€˜‰ðÍÑ•ÀõíÍÑ•Á}Í•Œè¸É™õÌ•µ„õí•µ…}ÍÑ•Á}Í•Œè¸É™õÌQõí™µÑ}Ñ¥µ”¡•Ñ…}Í•Œ¥ô€ˆ(€€€€€€€€€€€€€€€€€€€˜‰ðíµ•µ}¥¹™½ôˆ(€€€€€€€€€€€€€€€€¤(((€€€€€€€€€€€€€€€±½•È¹±½}ÍÑ•À (€€€€€€€€€€€€€€€€€€€•Á½ õ•À°(€€€€€€€€€€€€€€€€€€€±½‰…±}ÍÑ•ÀõÍÑ•À°(€€€€€€€€€€€€€€€€€€€±½ÍÍ}…ÙœõÉÕ¹}±½ÍÌ½…ÉÌ¹±½}ÍÑ•ÁÌ°(€€€€€€€€€€€€€€€€€€€±ÈõÕÉÉ•¹Ñ}±È°(€€€€€€€€€€€€€€€€€€€É…‘}¹½É´õÉ…‘}¹½Éµ}ÁÔ°(€€€€€€€€€€€€€€€€€€€Í•Å}±•¹}…Ùœõ…Ù}±•¸°(€€€€€€€€€€€€€€€€€€€Í•Å}±•¹}µ…àõµ…á}•™™}±•¸°(€€€€€€€€€€€€€€€€€€€Á…‘}±•¸õÁ…‘}±•¸°(€€€€€€€€€€€€€€€€€€€…Ù}Á½Ìõ…Ù}Á½Ì°(€€€€€€€€€€€€€€€€€€€…Ù}¹•œõ…Ù}¹•œ°(€€€€€€€€€€€€€€€€€€€…Ù}Á…¥ÉÌõ…Ù}Á…¥ÉÌ°(€€€€€€€€€€€€€€€€€€€ÍÑ•Á}Í•ŒõÍÑ•Á}Í•Œ°(€€€€€€€€€€€€€€€€€€€•µ…}ÍÑ•Á}Í•Œõ•µ…}ÍÑ•Á}Í•Œ°(€€€€€€€€€€€€€€€€€€€•Ñ…}Í•Œõ•Ñ…}Í•Œ°(€€€€€€€€€€€€€€€€€€€ÁÕ}µ•µ}…±±½}ˆõ…±±½Œ°(€€€€€€€€€€€€€€€€€€€ÁÕ}µ•µ}É•Í•ÉÙ•‘}ˆõÉ•Í•ÉÙ•°(€€€€€€€€€€€€€€€€¤(€€€€€€€€€€€€€€€±½•È¹Á±½Ñ}ÕÉÙ•Ì ¤(€€€€€€€€€€€€€€€ÉÕ¹}±½ÍÌ€ô€À¸À((€€€€€€€€€€€€Œ‘•°•¹Œ°½ÕÐ°Í½É•Ì(€€€€€€€€€€€€Œ¥˜Ñ½É ¹Õ‘„¹¥Í}…Ù…¥±…‰±” ¤èÑ½É ¹Õ‘„¹•µÁÑå}…¡” ¤(€€€€€€€€€€€¥˜…ÉÌ¹µ…á}ÍÑ•ÁÌ€ø€À…¹ÍÑ•À€øô…ÉÌ¹µ…á}ÍÑ•ÁÌè(€€€€€€€€€€€€€€€¥˜¥Í}µ…¥¸¡É…¹¬¤è(€€€€€€€€€€€€€€€€€€€ÁÉ¥¹Ð¡˜‰mMÑ½ÁtI•…¡•µ…á}ÍÑ•ÁÌõí…ÉÌ¹µ…á}ÍÑ•ÁÍô¸á¥Ñ¥¹œÑÉ…¥¹¥¹œ±½½À¸ˆ¤(€€€€€€€€€€€€€€€ÍÑ½Á}ÑÉ…¥¹¥¹œ€ôQÉÕ”(€€€€€€€€€€€€€€€‰É•…¬((€€€€€€€•Á}Ñ¥µ”€ôÑ¥µ”¹Ñ¥µ” ¤€´•Á}ÍÑ…ÉÐ(€€€€€€€‰…ÉÉ¥•È ¤(€€€€€€€Ù…±¥‘}Í…µÁ±•È¹Í•Ñ}•Á½ ¡•À¤(€€€€€€€µ•ÑÉ¥Ì€ô•Ù…±Õ…Ñ”¡µ½‘•°°Ñ½¬°Ù…}±°‘•Ù¥”°(€€€€€€€€€€€€€€€€€€€€€€€€€€ÕÑ½™˜ôÄÀ°Põ…ÉÌ¹Ñ•µÀ°Å}µ…àõ…ÉÌ¹Å}µ…à°‘}µ…àõ…ÉÌ¹‘}µ…à°É…¹¬õÉ…¹¬¤((€€€€€€€¥˜¥Í}µ…¥¸¡É…¹¬¤è(€€€€€€€€€€€ÁÉ¥¹Ð¡˜‰q¸ôôøÁ½ í•Áô½µÁ±•Ñ•¥¸í™µÑ}Ñ¥µ”¡•Á}Ñ¥µ”¥ôˆ¤(€€€€€€€€€€€ÁÉ¥¹Ð ‰Y…±¥‘…Ñ¥½¸5•ÑÉ¥Ìèˆ¤(€€€€€€€€€€€¥˜€‰5II ÄÀˆ¥¸µ•ÑÉ¥Ìè(€€€€€€€€€€€€€€€ÁÉ¥¹Ð¡˜ˆ€5II ÄÀèíµ•ÑÉ¥Íl5II ÄÀtè¸Ñ™ôðA Ôèíµ•ÑÉ¥ÍlA Ôtè¸Ñ™ôðA ÄÀèíµ•ÑÉ¥ÍlA ÄÀtè¸Ñ™ôðA½ÍÉ½ÕÁÌèíµ•ÑÉ¥ÍlA½ÍÉ½ÕÁÌuôˆ¤(€€€€€€€€€€€€€€€ÁÉ¥¹Ð¡˜ˆ€Q½ÀÅ}Œèíµ•ÑÉ¥ÍlQ½ÀÅ}Œtè¸Ñ™ôð5¥¹}A½Í}I…¹¬èíµ•ÑÉ¥Íl5¥¹}A½Í}I…¹¬tè¸É™ôð5…á}9•}I…¹¬èíµ•ÑÉ¥Íl5…á}9•}I…¹¬tè¸É™ôðI…¹­}…Àèíµ•ÑÉ¥ÍlI…¹­}…Àtè¸É™ôð-1}¥Øèíµ•ÑÉ¥Íl-1}¥Øtè¸Ñ™ôˆ¤(€€€€€€€€€€€¥˜€‰9•É½ÕÁÌˆ¥¸µ•ÑÉ¥Ìè(€€€€€€€€€€€€€€€ÁÉ¥¹Ð¡˜ˆ€9•}-0¡µ•…¸¤èíµ•ÑÉ¥Íl9•}-0¡µ•…¸¤tè¸Ñ™ôð9•}5…áM½É”¡µ•…¸¤èíµ•ÑÉ¥Íl9•}5…áM½É”¡µ•…¸¤tè¸Ñ™ôð9•É½ÕÁÌèíµ•ÑÉ¥Íl9•É½ÕÁÌuôˆ¤(€€€€€€€€€€€ÁÉ¥¹Ð ˆ´ˆ¨ØÀ¤(((€€€€€€€€€€€±½•È¹±½}•Á½ ¡•À°•Á}Ñ¥µ”°µ•ÑÉ¥Ì¤(€€€€€€€€€€€±½•È¹Á±½Ñ}ÕÉÙ•Ì ¤((€€€€€€€€€€€Í½É•}™½É}‰•ÍÐ€ôµ•ÑÉ¥Ì¹•Ð ‰5II ÄÀˆ°€À¸À¤((€€€€€€€€€€€¥˜Í½É•}™½É}‰•ÍÐ€ø‰•ÍÑ}¹‘œè(€€€€€€€€€€€€€€€‰•ÍÑ}¹‘œ€ôÍ½É•}™½É}‰•ÍÐ(€€€€€€€€€€€€€€€¥˜¥Í}µ…¥¸¡É…¹¬¤è(€€€€€€€€€€€€€€€€€€€¥˜…ÉÌ¹ÕÍ•}±½É„è((€€€€€€€€€€€€€€€€€€€€€€€µ½‘•°¹µ½‘Õ±”¹Í…Ù•}ÁÉ•ÑÉ…¥¹•¡‰•ÍÑ}‘¥È¤(€€€€€€€€€€€€€€€€€€€•±Í”è(€€€€€€€€€€€€€€€€€€€€€€€µ½‘•°¹µ½‘Õ±”¹Í…Ù•}ÁÉ•ÑÉ…¥¹•¡‰•ÍÑ}‘¥È¤(€€€€€€€€€€€€€€€€€€€Ñ½¬¹Í…Ù•}ÁÉ•ÑÉ…¥¹•¡‰•ÍÑ}‘¥È¤(€€€€€€€€€€€€€€€€€€€Ñ½É ¹Í…Ù”¡ì‰•Á½ ˆè•À°€‰‰•ÍÑ}5II ÄÀˆè‰•ÍÑ}¹‘ô°½Ì¹Á…Ñ ¹©½¥¸¡‰•ÍÑ}‘¥È°€‰ÑÉ…¥¹•É}ÍÑ…Ñ”¹ÁÐˆ¤¤(€€€€€€€€€€€€€€€€€€€ÁÉ¥¹Ð¡˜‰mÍ…Ù•t‰•ÍÐ€´øí‰•ÍÑ}‘¥Éô€¡5II ÄÀèí‰•ÍÑ}¹‘œè¸Ñ™ô¤ˆ¤(((€€€€€€€€€€€¥˜¥Í}µ…¥¸¡É…¹¬¤è(€€€€€€€€€€€€€€€¥˜…ÉÌ¹ÕÍ•}±½É„è((€€€€€€€€€€€€€€€€€€€µ½‘•°¹µ½‘Õ±”¹Í…Ù•}ÁÉ•ÑÉ…¥¹•¡±…ÍÑ}‘¥È¤(€€€€€€€€€€€€€€€•±Í”è(€€€€€€€€€€€€€€€€€€€µ½‘•°¹µ½‘Õ±”¹Í…Ù•}ÁÉ•ÑÉ…¥¹•¡±…ÍÑ}‘¥È¤(€€€€€€€€€€€€€€€Ñ½¬¹Í…Ù•}ÁÉ•ÑÉ…¥¹•¡±…ÍÑ}‘¥È¤(€€€€€€€€€€€€€€€Ñ½É ¹Í…Ù”¡ì‰•Á½ ˆè•À°€‰5II ÄÀˆèÍ½É•}™½É}‰•ÍÑô°½Ì¹Á…Ñ ¹©½¥¸¡±…ÍÑ}‘¥È°€‰ÑÉ…¥¹•É}ÍÑ…Ñ”¹ÁÐˆ¤¤()¥˜}}¹…µ•}|€ôô€‰}}µ…¥¹}|ˆè(€€€µ…¥¸ ¤
+                        P_ideal[y == 1] = 1.0 / num_pos
+                    P_model = torch.softmax(s, dim=0)
+                    loss_IRDA = torch.sum(P_ideal * torch.log((P_ideal + 1e-12) / (P_model + 1e-12)))
+                    total_loss = loss_pairwise + beta_IRDA * loss_IRDA
+                else:
+                    total_loss = loss_pairwise
+
+                losses.append(total_loss)
+            else:
+
+                losses.append(torch.zeros((), device=device))
+
+        else:
+
+            if has_neg:
+                if beta_ent > 0.0:
+
+                    p = torch.softmax(neg / T, dim=0)
+                    l_ent = (p * torch.log(p * neg.numel() + 1e-12)).sum()
+                    losses.append(beta_ent * l_ent)
+                else:
+
+
+
+                    if rank_loss == "hinge":
+                        loss_neg = torch.clamp(neg + margin, min=0).mean()
+                    else:  # logistic-like: log(1 + exp(s_i))
+                        loss_neg = torch.log1p(torch.exp(neg)).mean()
+                    losses.append(loss_neg)
+            else:
+
+                losses.append(torch.zeros((), device=device))
+        off += L
+
+    return torch.stack(losses).mean()
+
+# ---------------- metrics (DDP reduce) ----------------
+@torch.no_grad()
+def evaluate(model, tok, loader, device, *, cutoff=10, T=1.0, q_max=256, d_max=256, rank=0,
+             clamp=20.0, eps=1e-8):
+
+    was_training = model.training
+    model.eval()
+    RR_sum = torch.tensor(0.0, device=device); P5_sum = torch.tensor(0.0, device=device)
+    P10_sum = torch.tensor(0.0, device=device); pos_groups = torch.tensor(0.0, device=device)
+    ent_sum = torch.tensor(0.0, device=device); maxs_sum = torch.tensor(0.0, device=device)
+    neg_groups = torch.tensor(0.0, device=device)
+
+
+    Top1Acc_sum = torch.tensor(0.0, device=device)
+    MinPosRank_sum = torch.tensor(0.0, device=device)
+    MaxNegRank_sum = torch.tensor(0.0, device=device)
+    RankGap_sum = torch.tensor(0.0, device=device)
+    KLDiv_sum = torch.tensor(0.0, device=device)
+    kl_groups = torch.tensor(0.0, device=device)
+
+    for Q, D, Y, lens, CDs in loader:
+        enc = encode_pairs_split_trunc(tok, Q, D, q_max=q_max, d_max=d_max, device=device)
+        s_gpu = model(enc["input_ids"], enc["attention_mask"].long(), mode="rerank")["scores"].squeeze(-1)
+
+
+        s = torch.nan_to_num(s_gpu, nan=0.0, posinf=1e6, neginf=-1e6).detach().cpu()
+        Y_cpu = Y.cpu()
+
+
+        off = 0
+        norm_list = []
+        for L in lens:
+            sg = s[off:off+L].float()
+            if L > 1:
+                mu = sg.mean()
+                var = (sg - mu).pow(2).mean()
+                if var < eps:
+                    sg = torch.zeros_like(sg)
+                else:
+                    std = var.sqrt()
+                    sg = (sg - mu) / (std + eps)
+            sg = sg.clamp_(-clamp, clamp)
+            norm_list.append(sg)
+            off += L
+        s = torch.cat(norm_list, dim=0) if len(norm_list) > 1 else norm_list[0]
+
+
+        off = 0
+        for L, cd in zip(lens, CDs):
+            ss = s[off:off+L]; yy = Y_cpu[off:off+L]
+            k = min(cutoff, L)
+
+            if (yy==1).any():
+                order = torch.argsort(ss, descending=True)
+                top = yy[order[:k]]
+
+
+                idx = (top==1).nonzero(as_tuple=True)[0]
+                rr = 1.0/float(idx[0].item()+1) if idx.numel()>0 else 0.0
+                RR_sum += rr
+                P5_sum  += float(top[:min(5,k)].float().mean())
+                P10_sum += float(top[:min(10,k)].float().mean())
+                pos_groups += 1.0
+
+
+                Top1Acc_sum += float(yy[order[0]] == 1)
+                min_pos_rank = order[yy == 1].min() + 1
+                MinPosRank_sum += float(min_pos_rank)
+                if (yy == 0).any():
+                    max_neg_rank = order[yy == 0].max() + 1
+                    MaxNegRank_sum += float(max_neg_rank)
+                    RankGap_sum += float(max_neg_rank - min_pos_rank)
+
+
+                ss_raw = s_gpu[off:off+L].float().detach().cpu()
+                P_ideal = torch.zeros_like(yy, dtype=torch.float32)
+                num_pos = (yy == 1).sum().item()
+                if num_pos > 0:
+                    P_ideal[yy == 1] = 1.0 / num_pos
+                P_model = torch.softmax(ss_raw, dim=0)
+                kl_div = torch.sum(P_ideal * torch.log((P_ideal + 1e-12) / (P_model + 1e-12)))
+                KLDiv_sum += float(kl_div)
+                kl_groups += 1.0
+            else:
+
+                p = torch.softmax(ss / max(T, eps), dim=0)
+                ent_sum  += float((p * torch.log(p * L + eps)).sum())
+                maxs_sum += float(ss.max().item())
+                neg_groups += 1.0
+            off += L
+
+    if dist.is_available() and dist.is_initialized():
+        for t in [RR_sum, P5_sum, P10_sum, pos_groups, ent_sum, maxs_sum, neg_groups,
+                  Top1Acc_sum, MinPosRank_sum, MaxNegRank_sum, RankGap_sum, KLDiv_sum, kl_groups]:
+            dist.all_reduce(t, op=dist.ReduceOp.SUM)
+
+    metrics = {}
+    if pos_groups.item() > 0:
+        metrics.update({
+            "MRR@10": (RR_sum/pos_groups).item(),
+            "P@5": (P5_sum/pos_groups).item(),
+            "P@10": (P10_sum/pos_groups).item(),
+            "PosGroups": int(pos_groups.item()),
+            "Top1_Acc": (Top1Acc_sum/pos_groups).item(),
+            "Min_Pos_Rank": (MinPosRank_sum/pos_groups).item(),
+            "Max_Neg_Rank": (MaxNegRank_sum/pos_groups).item() if pos_groups.item() > 0 else 0.0,
+            "Rank_Gap": (RankGap_sum/pos_groups).item() if pos_groups.item() > 0 else 0.0,
+            "KL_Div": (KLDiv_sum/kl_groups).item() if kl_groups.item() > 0 else 0.0,
+        })
+    if neg_groups.item() > 0:
+        metrics.update({
+            "Neg_KL(mean)": (ent_sum/neg_groups).item(),
+            "Neg_MaxScore(mean)": (maxs_sum/neg_groups).item(),
+            "NegGroups": int(neg_groups.item())
+        })
+
+
+    if was_training:
+        model.train()
+
+    return metrics
+
+@torch.no_grad()
+def _log_raw_scores(Q, D, Y, lens, scores, step, epoch):
+    """
+    Summarize scores for mixed and all-negative groups.
+    """
+    scores = scores.detach().cpu()
+    Y_cpu  = Y.cpu()
+    off = 0
+    pos_groups, neg_groups = 0, 0
+    pos_scores, neg_scores = [], []
+    pure_neg_scores = []
+
+    for L in lens:
+        grp_s = scores[off:off+L]
+        grp_y = Y_cpu[off:off+L]
+        if (grp_y == 1).any():
+            pos_groups += 1
+            pos_scores.extend(grp_s[grp_y == 1].tolist())
+            neg_scores.extend(grp_s[grp_y == 0].tolist())
+        else:
+            neg_groups += 1
+            pure_neg_scores.extend(grp_s.tolist())
+        off += L
+
+
+    print(f"[Step {step}]  "
+          f"PosGroups={pos_groups}  "
+          f"PosScores={pos_scores}  "
+          f"NegScores={neg_scores}  |  "
+          f"NegGroups={neg_groups}  "
+          f"PureNegScores={pure_neg_scores}")
+
+# ---------------- main ----------------
+def main():
+    args = get_args()
+    rank, world_size, local_rank = setup_ddp()
+    device = torch.device(f"cuda:{local_rank}" if torch.cuda.is_available() else "cpu")
+    if is_main(rank): os.makedirs(args.out_dir, exist_ok=True)
+    barrier()
+
+
+    logger = TrainLogger(args.out_dir, enable=is_main(rank))
+
+    if is_main(rank):
+        print("="*60)
+        print("Training Configuration (DDP):")
+        print(f"  World size: {world_size} | Rank: {rank} | Local rank: {local_rank}")
+        print(f"  Model: {args.model_path}")
+        print(f"  Data: {args.tsv}")
+        print(f"  Output: {args.out_dir}")
+        print(f"  Epochs: {args.epochs} | Batch groups/GPU: {args.batch_groups}")
+        print(f"  LR: {args.lr} | Weight decay: {args.weight_decay}")
+        print(f"  Rank loss: {args.rank_loss} | Margin: {args.margin}")
+        print(f"  Beta ent: {args.beta_ent} | Temp: {args.temp}")
+        print(f"  Max pairs: {args.max_pairs} | Grad clip: {args.grad_clip}")
+        print(f"  Warmup ratio: {args.warmup_ratio} | Seed: {args.seed}")
+        print(f"  q_max: {args.q_max} | d_max: {args.d_max}")
+        print(f"  Alpha: {args.alpha} | Gamma: {args.gamma} | Beta_IRDA: {args.beta_IRDA}")
+
+
+        if args.use_lora:
+            print(f"  LoRA: Enabled | r: {args.lora_r} | alpha: {args.lora_alpha} | dropout: {args.lora_dropout}")
+            print(f"  Target modules: {args.target_modules}")
+        else:
+            print(f"  LoRA: Disabled")
+        print("="*60)
+
+
+    if is_main(rank):
+        print(f"[INFO] Setting model initialization seed to {args.seed} for all ranks")
+
+
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed_all(args.seed)
+    np.random.seed(args.seed)
+    random.seed(args.seed)
+
+
+    tok = AutoTokenizer.from_pretrained(args.model_path)
+
+
+    model = Qwen3ForEmbedding.from_pretrained(args.model_path)
+
+
+    if args.grad_checkpoint:
+        print("[INFO] Enabling Gradient Checkpointing to save memory...")
+
+
+
+        try:
+            model.gradient_checkpointing_enable()
+        except ValueError:
+
+            if hasattr(model, "model"):
+                model.model.gradient_checkpointing_enable()
+
+                if hasattr(model, "config"):
+                    model.config.gradient_checkpointing = True
+            else:
+
+                print("[WARN] Forcing supports_gradient_checkpointing=True")
+                model.supports_gradient_checkpointing = True
+                model.gradient_checkpointing_enable()
+
+
+        if hasattr(model, "config"):
+            model.config.use_cache = False
+
+
+        if args.use_lora:
+            if hasattr(model, "enable_input_require_grads"):
+                model.enable_input_require_grads()
+            else:
+                def make_inputs_require_grad(module, input, output):
+                    output.requires_grad_(True)
+                model.get_input_embeddings().register_forward_hook(make_inputs_require_grad)
+    # ==========================================================
+
+
+
+    if hasattr(model, "score_head"):
+        torch.manual_seed(args.seed)
+        with torch.no_grad():
+            model.score_head.weight.zero_()
+
+            nn.init.normal_(model.score_head.weight, mean=0.0, std=0.01)
+            if model.score_head.bias is not None:
+                nn.init.zeros_(model.score_head.bias)
+
+
+        model.score_head.weight.requires_grad = True
+        if model.score_head.bias is not None:
+            model.score_head.bias.requires_grad = True
+
+
+    if args.use_lora:
+        lora_config = LoraConfig(
+            task_type=TaskType.FEATURE_EXTRACTION,
+            r=args.lora_r,
+            lora_alpha=args.lora_alpha,
+            target_modules=args.target_modules,
+            lora_dropout=args.lora_dropout,
+            bias="none",
+            modules_to_save=["score_head"]
+        )
+
+        model = get_peft_model(model, lora_config)
+
+        if is_main(rank):
+            model.print_trainable_parameters()
+
+
+    try:
+        model.model.config.attn_implementation = "sdpa"
+    except Exception:
+        pass
+
+
+    set_seed(args.seed + rank)
+
+    model.to(device)
+
+    if dist.is_available() and dist.is_initialized():
+        model = torch.nn.parallel.DistributedDataParallel(
+            model, device_ids=[local_rank], output_device=local_rank, find_unused_parameters=False
+        )
+    model_to_save = model.module if hasattr(model, "module") else model
+
+
+    model.train()
+
+    ds = GroupDataset(args.tsv)
+    n = len(ds); split = int(0.9*n)
+    if is_main(rank): print(f"Dataset: {n} groups (train: {split}, valid: {n-split})")
+
+    train_subset = torch.utils.data.Subset(ds, list(range(split)))
+    valid_subset = torch.utils.data.Subset(ds, list(range(split, n)))
+
+    train_sampler = DistributedSampler(train_subset, num_replicas=world_size, rank=rank, shuffle=False, drop_last=False)
+    valid_sampler = DistributedSampler(valid_subset, num_replicas=world_size, rank=rank, shuffle=False, drop_last=False)
+
+    tr_ld = DataLoader(train_subset, batch_size=args.batch_groups, sampler=train_sampler, collate_fn=collate_groups)
+    va_ld = DataLoader(valid_subset, batch_size=args.batch_groups, sampler=valid_sampler, collate_fn=collate_groups)
+
+    optim = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+
+    steps_per_epoch = len(tr_ld)
+    computed_total_steps = args.epochs * steps_per_epoch
+
+    if args.max_steps > 0:
+        total_steps = args.max_steps
+
+
+        if total_steps < computed_total_steps:
+             if is_main(rank):
+                 print(f"[Info] Overriding total_steps from {computed_total_steps} to {total_steps} due to --max_steps")
+    else:
+        total_steps = computed_total_steps
+
+    warm_steps = int(total_steps * args.warmup_ratio)
+    sched = get_linear_schedule_with_warmup(optim, warm_steps, total_steps)
+    scaler = torch.amp.GradScaler('cuda', enabled=True)
+
+    best_ndcg = -1.0
+    best_dir = os.path.join(args.out_dir, "best"); last_dir = os.path.join(args.out_dir, "last")
+    if is_main(rank):
+        os.makedirs(best_dir, exist_ok=True); os.makedirs(last_dir, exist_ok=True)
+
+    steps_done = 0; ema_step_sec = None; step = 0; run_loss = 0.0
+    start_time = time.time()
+
+    stop_training = False
+
+
+    SCORE_LOG_EVERY = max(1, args.log_steps // 2)
+
+    for ep in range(1, args.epochs+1):
+        if stop_training: break
+
+
+        model.train()
+        train_sampler.set_epoch(ep)
+        ep_start = time.time()
+
+        for Q, D, Y, lens, group_labels in tr_ld:
+            if args.max_steps > 0 and step >= args.max_steps:
+                stop_training = True
+                break
+            t0 = time.time()
+
+            enc = encode_pairs_split_trunc(tok, Q, D, q_max=args.q_max, d_max=args.d_max, device=device)
+            with torch.amp.autocast('cuda', dtype=torch.bfloat16):
+                out = model(enc["input_ids"], enc["attention_mask"].long(), mode="rerank")
+                scores = torch.nan_to_num(out["scores"].squeeze(-1), nan=-1e9)
+                loss = groupwise_loss(scores, Y.to(device), lens, group_labels.to(device),
+                      rank_loss=args.rank_loss, margin=args.margin,
+                      alpha=args.alpha, gamma=args.gamma,
+                      beta_ent=args.beta_ent, T=args.temp,
+                      max_pairs=args.max_pairs, device=device,
+                      beta_IRDA=args.beta_IRDA)
+            scaler.scale(loss).backward()
+
+
+            scaler.unscale_(optim)
+
+            grad_norm = torch.tensor(0.0, device=device)
+            if is_main(rank):
+
+                grads = [p.grad.detach() for p in model.parameters() if p.grad is not None]
+                if grads:
+                    grad_norm = torch.norm(torch.stack([torch.norm(g, 2) for g in grads]), 2)
+
+
+            nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip)
+
+            scaler.step(optim); scaler.update(); sched.step()
+            optim.zero_grad(set_to_none=True)
+
+            loss_detached = float(loss.detach())
+            run_loss += loss_detached; step += 1; steps_done += 1
+
+
+            if is_main(rank) and step % SCORE_LOG_EVERY == 0:
+                _log_raw_scores(Q, D, Y, lens, scores, step, ep)
+
+            step_sec = time.time() - t0
+            if ema_step_sec is None: ema_step_sec = step_sec
+            else: ema_step_sec = 0.9*ema_step_sec + 0.1*step_sec
+            eta_sec = max(0.0, (total_steps-steps_done) * ema_step_sec)
+
+            if is_main(rank) and step % args.log_steps == 0:
+                avg_len, max_eff_len, pad_len = seq_len_stats(enc["attention_mask"])
+                avg_pos, avg_neg, avg_pairs = batch_stats(Y, lens, args.max_pairs)
+                if torch.cuda.is_available():
+                    alloc = torch.cuda.memory_allocated(device) / (1024**3)
+                    reserved = torch.cuda.memory_reserved(device) / (1024**3)
+                    mem_info = f"GPU{local_rank} mem alloc/resv: {alloc:.1f}G/{reserved:.1f}G"
+                else:
+                    alloc = reserved = 0.0
+                    mem_info = "GPU mem: N/A"
+                current_lr = sched.get_last_lr()[0]
+
+                grad_norm_cpu = float(grad_norm.item()) if is_main(rank) else 0.0
+
+                print(
+                    f"[Main] ep {ep} step {step}/{total_steps} "
+                    f"loss={run_loss/args.log_steps:.4f} lr={current_lr:.2e} "
+                    f"grad_norm={grad_norm_cpu:.4f} "
+                    f"| seq_len avg/max/pad={avg_len:.1f}/{max_eff_len}/{pad_len} "
+                    f"| grp avg pos/neg={avg_pos:.1f}/{avg_neg:.1f} pairs~{avg_pairs:.0f} "
+                    f"| step={step_sec:.2f}s ema={ema_step_sec:.2f}s ETA={fmt_time(eta_sec)} "
+                    f"| {mem_info}"
+                )
+
+
+                logger.log_step(
+                    epoch=ep,
+                    global_step=step,
+                    loss_avg=run_loss/args.log_steps,
+                    lr=current_lr,
+                    grad_norm=grad_norm_cpu,
+                    seq_len_avg=avg_len,
+                    seq_len_max=max_eff_len,
+                    pad_len=pad_len,
+                    avg_pos=avg_pos,
+                    avg_neg=avg_neg,
+                    avg_pairs=avg_pairs,
+                    step_sec=step_sec,
+                    ema_step_sec=ema_step_sec,
+                    eta_sec=eta_sec,
+                    gpu_mem_alloc_gb=alloc,
+                    gpu_mem_reserved_gb=reserved,
+                )
+                logger.plot_curves()
+                run_loss = 0.0
+
+            # del enc, out, scores
+            # if torch.cuda.is_available(): torch.cuda.empty_cache()
+            if args.max_steps > 0 and step >= args.max_steps:
+                if is_main(rank):
+                    print(f"[Stop] Reached max_steps={args.max_steps}. Exiting training loop.")
+                stop_training = True
+                break
+
+        ep_time = time.time() - ep_start
+        barrier()
+        valid_sampler.set_epoch(ep)
+        metrics = evaluate(model, tok, va_ld, device,
+                           cutoff=10, T=args.temp, q_max=args.q_max, d_max=args.d_max, rank=rank)
+
+        if is_main(rank):
+            print(f"\n==> Epoch {ep} completed in {fmt_time(ep_time)}")
+            print("Validation Metrics:")
+            if "MRR@10" in metrics:
+                print(f"  MRR@10: {metrics['MRR@10']:.4f} | P@5: {metrics['P@5']:.4f} | P@10: {metrics['P@10']:.4f} | PosGroups: {metrics['PosGroups']}")
+                print(f"  Top1_Acc: {metrics['Top1_Acc']:.4f} | Min_Pos_Rank: {metrics['Min_Pos_Rank']:.2f} | Max_Neg_Rank: {metrics['Max_Neg_Rank']:.2f} | Rank_Gap: {metrics['Rank_Gap']:.2f} | KL_Div: {metrics['KL_Div']:.4f}")
+            if "NegGroups" in metrics:
+                print(f"  Neg_KL(mean): {metrics['Neg_KL(mean)']:.4f} | Neg_MaxScore(mean): {metrics['Neg_MaxScore(mean)']:.4f} | NegGroups: {metrics['NegGroups']}")
+            print("-"*60)
+
+
+            logger.log_epoch(ep, ep_time, metrics)
+            logger.plot_curves()
+
+            score_for_best = metrics.get("MRR@10", 0.0)
+
+            if score_for_best > best_ndcg:
+                best_ndcg = score_for_best
+                if is_main(rank):
+                    model_to_save.save_pretrained(best_dir)
+                    tok.save_pretrained(best_dir)
+                    torch.save({"epoch": ep, "best_MRR@10": best_ndcg}, os.path.join(best_dir, "trainer_state.pt"))
+                    print(f"[save] best -> {best_dir} (MRR@10: {best_ndcg:.4f})")
+
+
+            if is_main(rank):
+                model_to_save.save_pretrained(last_dir)
+                tok.save_pretrained(last_dir)
+                torch.save({"epoch": ep, "MRR@10": score_for_best}, os.path.join(last_dir, "trainer_state.pt"))
+
+    barrier()
+    if dist.is_available() and dist.is_initialized():
+        dist.destroy_process_group()
+
+if __name__ == "__main__":
+    main()

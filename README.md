@@ -15,10 +15,6 @@
 This is the official repository for **RULER**, published in the proceedings of
 **SIGIR 2026**.
 
-> **Current status.** The Stage 1 retriever, data construction pipeline, Stage 2
-> reranker, and evaluation scripts are available. Model checkpoints remain
-> subject to a separate release decision.
-
 ## Table of Contents
 
 - [News](#news)
@@ -30,7 +26,6 @@ This is the official repository for **RULER**, published in the proceedings of
 - [Method](#method)
 - [Results](#results)
 - [Datasets](#datasets)
-- [Availability](#availability)
 - [Repository Structure](#repository-structure)
 - [Core Entry Points](#core-entry-points)
 - [License](#license)
@@ -156,16 +151,6 @@ usage terms of the original JuDGE and LeCaRDv2 datasets.
 
 Hugging Face dataset page: [RULER-dataset/RULER](https://huggingface.co/datasets/RULER-dataset/RULER)
 
-## Availability
-
-| Component | Status |
-|---|---|
-| README | Available |
-| Framework figure | Available |
-| Dataset page | Available on Hugging Face |
-| Training code | Available |
-| Evaluation scripts | Available |
-
 ## Repository Structure
 
 The release focuses on the paper's main pipeline:
@@ -174,7 +159,7 @@ The release focuses on the paper's main pipeline:
 RULER/
 |-- retriever/                 # Dense retrieval and shared Qwen3 model
 |-- scripts/                   # Training, data construction, and evaluation entrypoints
-|-- docs/                      # Dataset and result notes
+|-- docs/                      # Dataset and license notes
 |-- tests/                     # Behavioral tests
 |-- build_train_dataset.py     # Stage 2 group construction
 |-- build_test_dataset.py      # Evaluation candidate construction
