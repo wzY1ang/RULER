@@ -4,15 +4,15 @@
 
 <p align="center">
   <a href="https://sigir.org/sigir2026/"><img src="https://img.shields.io/badge/Venue-SIGIR%202026-blue" alt="SIGIR 2026"></a>
-  <img src="https://img.shields.io/badge/Status-Pre--release-orange" alt="Pre-release">
-  <img src="https://img.shields.io/badge/Code-Coming%20Soon-lightgrey" alt="Code coming soon">
+  <img src="https://img.shields.io/badge/Status-Code%20Released-brightgreen" alt="Code released">
+  <img src="https://img.shields.io/badge/Backbone-Qwen3--0.6B-blueviolet" alt="Qwen3-0.6B">
 </p>
 
 **语言：** [English](README.md) | 简体中文
 
-本仓库是 **RULER** 的官方仓库，对应论文已被 **SIGIR 2026** 接收。
+本仓库是 **RULER** 的官方仓库，对应论文已正式发表于 **SIGIR 2026** 论文集。
 
-> **当前状态。** 论文已经录用，但公开代码仍在整理中。本仓库目前处于预发布阶段，代码、脚本、模型权重和完整复现实验说明会在清理与验证完成后逐步发布。
+> **当前状态。** Stage 1 检索器、数据构造流程、Stage 2 重排器和评估脚本已经公开。模型权重是否发布仍需另行确认。
 
 ## 目录
 
@@ -27,7 +27,8 @@
 - [数据集](#数据集)
 - [可用资源](#可用资源)
 - [发布计划](#发布计划)
-- [计划中的仓库结构](#计划中的仓库结构)
+- [仓库结构](#仓库结构)
+- [核心入口](#核心入口)
 - [许可证](#许可证)
 - [致谢](#致谢)
 - [引用](#引用)
@@ -35,9 +36,9 @@
 
 ## 动态
 
-- **2026-07：** RULER 将发表于澳大利亚墨尔本举办的 SIGIR 2026。
+- **2026-07：** RULER 已正式发表于 SIGIR 2026 论文集。
 - **2026：** 论文已被第 49 届 ACM SIGIR Conference on Research and Development in Information Retrieval 接收。
-- **预发布：** 仓库清理和公开发布准备正在进行中。
+- **2026-07：** 已发布清理后的训练、数据构造和评估代码。
 
 ## 论文信息
 
@@ -48,8 +49,7 @@
 | 会议 | SIGIR 2026 |
 | 时间地点 | 2026 年 7 月 20-24 日，澳大利亚墨尔本 |
 | DOI | 10.1145/3805712.3809698 |
-| 论文 | Coming soon |
-| arXiv | Coming soon |
+| 论文 | [ACM Digital Library](https://doi.org/10.1145/3805712.3809698) |
 
 ## 摘要
 
@@ -142,7 +142,7 @@ RULER 在两个中文法律法条检索基准上进行评估：
 | JuDGE-Stat | JuDGE | 2,505 | 小样本法律法条检索基准。 |
 | LeCaRDv2-Stat | LeCaRDv2 | 39,833 | 从 LeCaRDv2 构建的精炼大规模子集，用于降低标注稀疏性并提升结构一致性。 |
 
-数据集页面已在 Hugging Face 上提供。数据预处理脚本和详细使用说明会在代码清理与许可检查完成后发布。用户也应遵守原始 JuDGE 和 LeCaRDv2 数据集的使用条款。
+数据集页面已在 Hugging Face 上提供，数据准备说明见 [`docs/data.md`](docs/data.md)。用户也应遵守原始 JuDGE 和 LeCaRDv2 数据集的使用条款。
 
 Hugging Face 数据集页面：[RULER-dataset/RULER](https://huggingface.co/datasets/RULER-dataset/RULER)
 
@@ -153,53 +153,66 @@ Hugging Face 数据集页面：[RULER-dataset/RULER](https://huggingface.co/data
 | README | 已提供 |
 | 框架图 | 已提供 |
 | 数据集页面 | 已在 Hugging Face 提供 |
-| 训练代码 | Coming soon |
-| 评估脚本 | Coming soon |
+| 训练代码 | 已提供 |
+| 评估脚本 | 已提供 |
 | 模型权重 | Coming soon，取决于发布许可 |
-| 复现文档 | Coming soon |
+| 复现文档 | 已提供 |
 
 ## 发布计划
 
 - [x] 论文被 SIGIR 2026 接收。
 - [x] 初版 README。
-- [ ] 清理训练和评估脚本。
-- [ ] 整理数据预处理流程。
-- [ ] 添加可复现实验配置。
-- [ ] 发布处理后数据说明或链接。
+- [x] 清理训练和评估脚本。
+- [x] 整理数据预处理流程。
+- [x] 添加可复现脚本入口。
+- [x] 发布处理后数据说明或链接。
 - [ ] 在许可允许时发布训练好的 checkpoint。
-- [ ] 添加完整复现文档。
+- [x] 添加复现文档。
 
-## 计划中的仓库结构
+## 仓库结构
 
-最终发布预计采用类似结构：
+当前发布聚焦论文的主要流程：
 
 ```text
 RULER/
-|-- retriever/                 # Stage 1 稠密检索器
-|-- reranker/                  # Stage 2 LoRA 重排器
-|-- baselines/                 # 稀疏、稠密和统一式基线
+|-- retriever/                 # 稠密检索与共享 Qwen3 模型
 |-- scripts/                   # 训练、数据构建和评估入口
-|-- configs/                   # 可复现实验配置
-|-- docs/                      # 数据集、复现和实现说明
+|-- docs/                      # 数据与结果说明
+|-- tests/                     # 行为回归与 checkpoint 冒烟测试
+|-- build_train_dataset.py     # Stage 2 分组数据构造
+|-- build_test_dataset.py      # 评估候选构造
 |-- requirements.txt           # Python 依赖
-|-- LICENSE
 `-- README.md
 ```
 
-该结构可能会在代码清理过程中略有调整。
+## 核心入口
+
+| 任务 | 命令 |
+|---|---|
+| 训练 Stage 1 检索器 | `bash scripts/train_ruler_retriever.sh` |
+| 构造检索结果与 Stage 2 分组 | `bash scripts/run_ruler_data_pipeline.sh` |
+| 训练 Stage 2 重排器 | `bash scripts/train_ruler_reranker.sh` |
+| 评估检索与重排 | `bash scripts/benchmark_ruler.sh` |
+
+两个阶段共享 `retriever/llm2vec_lasttoken/modeling_qwen3_embed.py` 中的模型实现。历史路径 `reranker/src/qwen3forall.py` 仅作为兼容导入保留。
 
 ## 安装
 
-安装命令会随首个代码版本一起发布。预计环境如下：
+RULER 已在 Python 3.9、PyTorch 2.4.0、CUDA 12.1 和 Transformers 4.52.4 环境中验证。
 
-- Python 3.9+
-- PyTorch 2.0+
-- 用于训练和评估的 CUDA GPU
-- `transformers`、`accelerate`、`peft`、`faiss`、`numpy`、`pandas` 以及常用评估工具
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+数据目录结构见 [`docs/data.md`](docs/data.md)。运行脚本前请设置 `BASE_MODEL_DIR`、`DATA_DIR` 和 `OUTPUT_DIR`。
 
 ## 许可证
 
-项目许可证会在完整公开发布前公布。第三方模型、数据集和 tokenizer 仍受其原始许可证约束。
+RULER 源代码采用 [MIT License](LICENSE) 开源。第三方模型、数据集、tokenizer
+以及单独分发的 checkpoint 仍遵循各自的许可证，详见
+[`docs/licenses.md`](docs/licenses.md)。
 
 ## 致谢
 
@@ -214,7 +227,8 @@ RULER 基于 Qwen、JuDGE、LeCaRDv2、BGE 以及统一检索与重排相关开�
   title = {{RULER}: Robust Unified {LLM}-based Efficient Retrieval for Legal Information},
   author = {Chenyu Hou and Ziyang Wang and Bin Cao and Jiaxing Wang and Tianming Zhang and Tiantian Li},
   booktitle = {Proceedings of the 49th International ACM SIGIR Conference on Research and Development in Information Retrieval},
-  year = {2026}
+  year = {2026},
+  doi = {10.1145/3805712.3809698}
 }
 ```
 

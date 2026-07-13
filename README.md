@@ -4,15 +4,18 @@
 
 <p align="center">
   <a href="https://sigir.org/sigir2026/"><img src="https://img.shields.io/badge/Venue-SIGIR%202026-blue" alt="SIGIR 2026"></a>
-  <img src="https://img.shields.io/badge/Status-Pre--release-orange" alt="Pre-release">
-  <img src="https://img.shields.io/badge/Code-Coming%20Soon-lightgrey" alt="Code coming soon">
+  <img src="https://img.shields.io/badge/Status-Code%20Released-brightgreen" alt="Code released">
+  <img src="https://img.shields.io/badge/Backbone-Qwen3--0.6B-blueviolet" alt="Qwen3-0.6B">
 </p>
 
 **Language:** English | [简体中文](README.zh-CN.md)
 
-This is the official repository for **RULER**, accepted to **SIGIR 2026**.
+This is the official repository for **RULER**, published in the proceedings of
+**SIGIR 2026**.
 
-> **Current status.** The paper has been accepted, but the public code release is still being prepared. This repository is currently being organized for release. Code, scripts, checkpoints, and full reproduction instructions will be added progressively after cleanup and verification.
+> **Current status.** The Stage 1 retriever, data construction pipeline, Stage 2
+> reranker, and evaluation scripts are available. Model checkpoints remain
+> subject to a separate release decision.
 
 ## Table of Contents
 
@@ -27,7 +30,8 @@ This is the official repository for **RULER**, accepted to **SIGIR 2026**.
 - [Datasets](#datasets)
 - [Availability](#availability)
 - [Release Roadmap](#release-roadmap)
-- [Planned Repository Structure](#planned-repository-structure)
+- [Repository Structure](#repository-structure)
+- [Core Entry Points](#core-entry-points)
 - [License](#license)
 - [Acknowledgements](#acknowledgements)
 - [Citation](#citation)
@@ -35,9 +39,9 @@ This is the official repository for **RULER**, accepted to **SIGIR 2026**.
 
 ## News
 
-- **2026-07:** RULER will appear at SIGIR 2026 in Melbourne, Australia.
+- **2026-07:** RULER was published in the proceedings of SIGIR 2026.
 - **2026:** Paper accepted to the 49th International ACM SIGIR Conference on Research and Development in Information Retrieval.
-- **Pre-release:** Repository cleanup and release preparation are in progress.
+- **2026-07:** The cleaned training, data construction, and evaluation code is available.
 
 ## Paper
 
@@ -48,8 +52,7 @@ This is the official repository for **RULER**, accepted to **SIGIR 2026**.
 | Venue | SIGIR 2026 |
 | Conference | July 20-24, 2026, Melbourne, VIC, Australia |
 | DOI | 10.1145/3805712.3809698 |
-| Paper | Coming soon |
-| arXiv | Coming soon |
+| Paper | [ACM Digital Library](https://doi.org/10.1145/3805712.3809698) |
 
 ## Abstract
 
@@ -107,7 +110,8 @@ RULER combines dynamic margin ranking loss with maximum entropy regularization, 
 
 ## Results
 
-The full experimental setup will be released with the cleaned code and reproduction scripts. The following numbers are reported in the accepted paper.
+The following numbers are reported in the accepted paper. Reproduction entry
+points are provided under `scripts/`.
 
 ### Retrieval Results
 
@@ -142,7 +146,9 @@ RULER is evaluated on two Chinese legal statute retrieval benchmarks:
 | JuDGE-Stat | JuDGE | 2,505 | Small-sample legal statute retrieval benchmark. |
 | LeCaRDv2-Stat | LeCaRDv2 | 39,833 | Refined large-scale subset designed to reduce annotation sparsity and improve structural consistency. |
 
-The dataset page is available on Hugging Face. Data preparation scripts and detailed usage instructions will be released after cleanup and license checks. Users should also follow the usage terms of the original JuDGE and LeCaRDv2 datasets.
+The dataset page is available on Hugging Face. Data preparation instructions
+are documented in [`docs/data.md`](docs/data.md). Users should also follow the
+usage terms of the original JuDGE and LeCaRDv2 datasets.
 
 Hugging Face dataset page: [RULER-dataset/RULER](https://huggingface.co/datasets/RULER-dataset/RULER)
 
@@ -153,53 +159,70 @@ Hugging Face dataset page: [RULER-dataset/RULER](https://huggingface.co/datasets
 | README | Available |
 | Framework figure | Available |
 | Dataset page | Available on Hugging Face |
-| Training code | Coming soon |
-| Evaluation scripts | Coming soon |
+| Training code | Available |
+| Evaluation scripts | Available |
 | Checkpoints | Coming soon, subject to release approval |
-| Reproduction guide | Coming soon |
+| Reproduction guide | Available |
 
 ## Release Roadmap
 
 - [x] Paper accepted to SIGIR 2026.
 - [x] Initial README draft.
-- [ ] Clean training and evaluation scripts.
-- [ ] Organize data preprocessing pipeline.
-- [ ] Add reproducible configuration files.
-- [ ] Release processed dataset instructions or links.
+- [x] Clean training and evaluation scripts.
+- [x] Organize data preprocessing pipeline.
+- [x] Add reproducible shell entry points.
+- [x] Release processed dataset instructions or links.
 - [ ] Release trained checkpoints when permitted.
-- [ ] Add full reproduction documentation.
+- [x] Add reproduction documentation.
 
-## Planned Repository Structure
+## Repository Structure
 
-The final release is expected to use a structure similar to:
+The release focuses on the paper's main pipeline:
 
 ```text
 RULER/
-|-- retriever/                 # Stage 1 dense retriever
-|-- reranker/                  # Stage 2 LoRA reranker
-|-- baselines/                 # Sparse, dense, and unified baselines
+|-- retriever/                 # Dense retrieval and shared Qwen3 model
 |-- scripts/                   # Training, data construction, and evaluation entrypoints
-|-- configs/                   # Reproducible experiment configurations
-|-- docs/                      # Dataset, reproduction, and implementation notes
+|-- docs/                      # Dataset and result notes
+|-- tests/                     # Behavioral and checkpoint smoke tests
+|-- build_train_dataset.py     # Stage 2 group construction
+|-- build_test_dataset.py      # Evaluation candidate construction
 |-- requirements.txt           # Python dependencies
-|-- LICENSE
 `-- README.md
 ```
 
-This layout may change slightly during release cleanup.
+## Core Entry Points
+
+| Task | Command |
+|---|---|
+| Train Stage 1 retriever | `bash scripts/train_ruler_retriever.sh` |
+| Build retrieval rankings and Stage 2 groups | `bash scripts/run_ruler_data_pipeline.sh` |
+| Train Stage 2 reranker | `bash scripts/train_ruler_reranker.sh` |
+| Evaluate retrieval and reranking | `bash scripts/benchmark_ruler.sh` |
+
+Both stages share the implementation in
+`retriever/llm2vec_lasttoken/modeling_qwen3_embed.py`. The historical
+`reranker/src/qwen3forall.py` module is retained as a compatibility import.
 
 ## Installation
 
-Installation commands will be added with the first code release. The expected environment is:
+RULER was recovered and verified with Python 3.9, PyTorch 2.4.0, CUDA 12.1,
+and Transformers 4.52.4.
 
-- Python 3.9+
-- PyTorch 2.0+
-- CUDA-enabled GPU for training and evaluation
-- `transformers`, `accelerate`, `peft`, `faiss`, `numpy`, `pandas`, and common evaluation utilities
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+See [`docs/data.md`](docs/data.md) for the expected data layout. Define
+`BASE_MODEL_DIR`, `DATA_DIR`, and `OUTPUT_DIR` before running the scripts.
 
 ## License
 
-The project license will be announced before the full public release. Third-party models, datasets, and tokenizers remain subject to their original licenses.
+RULER source code is released under the [MIT License](LICENSE). Third-party
+models, datasets, tokenizers, and separately distributed checkpoints remain
+subject to their original licenses; see [`docs/licenses.md`](docs/licenses.md).
 
 ## Acknowledgements
 
@@ -214,7 +237,8 @@ If you find this work useful, please cite:
   title = {{RULER}: Robust Unified {LLM}-based Efficient Retrieval for Legal Information},
   author = {Chenyu Hou and Ziyang Wang and Bin Cao and Jiaxing Wang and Tianming Zhang and Tiantian Li},
   booktitle = {Proceedings of the 49th International ACM SIGIR Conference on Research and Development in Information Retrieval},
-  year = {2026}
+  year = {2026},
+  doi = {10.1145/3805712.3809698}
 }
 ```
 

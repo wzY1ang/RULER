@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+RUN_FILTER="${RUN_FILTER:-0}"
+RUN_BUILD_TRAIN_RANK="${RUN_BUILD_TRAIN_RANK:-0}"
+RUN_BUILD_TEST_RANK="${RUN_BUILD_TEST_RANK:-0}"
+RUN_BUILD_TRAIN_TSV="${RUN_BUILD_TRAIN_TSV:-0}"
+RUN_BUILD_TEST_TSV="${RUN_BUILD_TEST_TSV:-0}"
+
+if [[ "$RUN_FILTER" == "1" ]]; then
+  INPUT_PATH="${INPUT_PATH:?Please set INPUT_PATH for LeCaRD filtering}"
+  OUTPUT_PATH="${OUTPUT_PATH:?Please set OUTPUT_PATH for filtered LeCaRD output}"
+  STATS_OUTPUT_PATH="${STATS_OUTPUT_PATH:-}"
+  MIN_LABELS="${MIN_LABELS:-3}"
+  TOP_K="${TOP_K:-20}"
+
+  CMD=(
+    bash "$REPO_ROOT/scripts/filter_lecard_subset.sh"
+  )
+
+  env \
+    INPUT_PATH="$INPUT_PATH" \
+    OUTPUT_PATH="$OUTPUT_PATH" \
+    STATS_OUTPUT_PATH="$STATS_OUTPUT_PATH" \
+    MIN_LABELS="$MIN_LABELS" \
+    TOP_K="$TOP_K" \
+    "${CMD[@]}"
+fi
+
+if [[ "$RUN_BUILD_TRAIN_RANK" == "1" ]]; then
+  TRAIN_QUERY_FILE="${TRAIN_QUERY_FILE:?Please set TRAIN_QUERY_FILE}"
+  LAW_CORPUS="${LAW_CORPUS:?Please set LAW_CORPUS}"
+  RETRIEVER_MODEL_PATH="${RETRIEVER_MODEL_PATH:?Please set RETRIEVER_MODEL_PATH}"
+  BASE_MODEL_PATH="${BASE_MODEL_PATH:?Please set BASE_MODEL_PATH}"
+  RANK_TRAIN_PATH="${RANK_TRAIN_PATH:?Please set RANK_TRAIN_PATH}"
+  TRAIN_WORK_DIR="${TRAIN_WORK_DIR:-$REPO_ROOT/output/ranking_train}"
+
+  env \
+    QUERY_FILE="$TRAIN_QUERY_FILE" \
+    CORPUS_FILE="$LAW_CORPUS" \
+    RETRIEVER_MODEL_PATH="$RETRIEVER_MODEL_PATH" \
+    BASE_MODEL_PATH="$BASE_MODEL_PATH" \
+    OUTPUT_RANK_PATH="$RANK_TRAIN_PATH" \
+    WORK_DIR="$TRAIN_WORK_DIR" \
+    bash "$REPO_ROOT/scripts/build_ruler_rankings.sh"
+fi
+
+if [[ "$RUN_BUILD_TEST_RANK" == "1" ]]; then
+  TEST_QUERY_FILE="${TEST_QUERY_FILE:?Please set TEST_QUERY_FILE}"
+  LAW_CORPUS="${LAW_CORPUS:?Please set LAW_CORPUS}"
+  RETRIEVER_MODEL_PATH="${RETRIEVER_MODEL_PATH:?Please set RETRIEVER_MODEL_PATH}"
+  BASE_MODEL_PATH="${BASE_MODEL_PATH:?Please set BASE_MODEL_PATH}"
+  RANK_TEST_PATH="${RANK_TEST_PATH:?Please set RANK_TEST_PATH}"
+  TEST_WORK_DIR="${TEST_WORK_DIR:-$REPO_ROOT/output/ranking_test}"
+
+  env \
+    QUERY_FILE="$TEST_QUERY_FILE" \
+    CORPUS_FILE="$LAW_CORPUS" \
+    RETRIEVER_MODEL_PATH="$RETRIEVER_MODEL_PATH" \
+    BASE_MODEL_PATH="$BASE_MODEL_PATH" \
+    OUTPUT_RANK_PATH="$RANK_TEST_PATH" \
+    WORK_DIR="$TEST_WORK_DIR" \
+    bash "$REPO_ROOT/scripts/build_ruler_rankings.sh"
+fi
+
+if [[ "$RUN_BUILD_TRAIN_TSV" == "1" ]]; then
+  TRAIN_JSON="${TRAIN_JSON:?Please set TRAIN_JSON}"
+  LAW_CORPUS="${LAW_CORPUS:?Please set LAW_CORPUS}"
+  RANK_TRAIN_PATH="${RANK_TRAIN_PATH:?Please set RANK_TRAIN_PATH}"
+  TRAIN_TSV_OUT="${TRAIN_TSV_OUT:?Please set TRAIN_TSV_OUT}"
+  SAMPLE_N="${SAMPLE_N:-}"
+
+  env \
+    TRAIN_JSON="$TRAIN_JSON" \
+    LAW_CORPUS="$LAW_CORPUS" \
+    RANK_TRAIN="$RANK_TRAIN_PATH" \
+    OUT_FILE="$TRAIN_TSV_OUT" \
+    SAMPLE_N="$SAMPLE_N" \
+    bash "$REPO_ROOT/scripts/build_ruler_train_tsv.sh"
+fi
+
+if [[ "$RUN_BUILD_TEST_TSV" == "1" ]]; then
+  TEST_JSON="${TEST_JSON:?Please set TEST_JSON}"
+  LAW_CORPUS="${LAW_CORPUS:?Please set LAW_CORPUS}"
+  RANK_TEST_PATH="${RANK_TEST_PATH:?Please set RANK_TEST_PATH}"
+  TEST_TSV_OUT="${TEST_TSV_OUT:?Please set TEST_TSV_OUT}"
+  TOPK="${TOPK:-50}"
+
+  env \
+    TEST_JSON="$TEST_JSON" \
+    LAW_CORPUS="$LAW_CORPUS" \
+    RANK_TEST="$RANK_TEST_PATH" \
+    OUT_FILE="$TEST_TSV_OUT" \
+    TOPK="$TOPK" \
+    bash "$REPO_ROOT/scripts/build_ruler_test_tsv.sh"
+fi
