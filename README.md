@@ -29,7 +29,6 @@ This is the official repository for **RULER**, published in the proceedings of
 - [Results](#results)
 - [Datasets](#datasets)
 - [Availability](#availability)
-- [Release Roadmap](#release-roadmap)
 - [Repository Structure](#repository-structure)
 - [Core Entry Points](#core-entry-points)
 - [License](#license)
@@ -40,7 +39,6 @@ This is the official repository for **RULER**, published in the proceedings of
 ## News
 
 - **2026-07:** RULER was published in the proceedings of SIGIR 2026.
-- **2026:** Paper accepted to the 49th International ACM SIGIR Conference on Research and Development in Information Retrieval.
 - **2026-07:** The cleaned training, data construction, and evaluation code is available.
 
 ## Paper
@@ -76,7 +74,7 @@ RULER consists of three connected parts: Stage 1 retrieval fine-tuning, retrieva
 
 ## Highlights
 
-- **Single 596M checkpoint:** one Qwen3-0.6B checkpoint supports both retrieval and reranking, avoiding two independent deployed models.
+- **Shared 596M backbone:** Stage 2 starts from the Stage 1 Qwen3-0.6B checkpoint and adds a LoRA adapter.
 - **Strong large-scale retrieval:** RULER reaches 0.9001 MRR@100 and 0.8350 Recall@10 on LeCaRDv2-Stat.
 - **High-precision reranking:** RULER achieves 0.8605 NDCG@10 and 0.7653 MAP@10 on LeCaRDv2-Stat.
 - **Robust zero-recall behavior:** RULER reduces NR@R to 9.9% on JuDGE-Stat, mitigating over-confident phantom hits.
@@ -97,7 +95,11 @@ Query
 
 ### Stage 1: Bi-Encoder Retrieval
 
-The retriever fine-tunes Qwen3-0.6B with last-token pooling and normalized embeddings. It generates dense representations for queries and statutes and retrieves top candidates through FAISS search.
+The retriever fine-tunes Qwen3-0.6B with last-token pooling and normalized
+embeddings. It generates dense representations for queries and statutes and
+retrieves top candidates through FAISS search. This release preserves the
+archived experimental implementation, which follows Qwen3's native causal
+attention path.
 
 ### Stage 2: Cross-Encoder Reranking
 
@@ -110,8 +112,8 @@ RULER combines dynamic margin ranking loss with maximum entropy regularization, 
 
 ## Results
 
-The following numbers are reported in the accepted paper. Reproduction entry
-points are provided under `scripts/`.
+The following numbers are reported in the published paper. Training and
+evaluation entry points are provided under `scripts/`.
 
 ### Retrieval Results
 
@@ -161,19 +163,6 @@ Hugging Face dataset page: [RULER-dataset/RULER](https://huggingface.co/datasets
 | Dataset page | Available on Hugging Face |
 | Training code | Available |
 | Evaluation scripts | Available |
-| Checkpoints | Coming soon, subject to release approval |
-| Reproduction guide | Available |
-
-## Release Roadmap
-
-- [x] Paper accepted to SIGIR 2026.
-- [x] Initial README draft.
-- [x] Clean training and evaluation scripts.
-- [x] Organize data preprocessing pipeline.
-- [x] Add reproducible shell entry points.
-- [x] Release processed dataset instructions or links.
-- [ ] Release trained checkpoints when permitted.
-- [x] Add reproduction documentation.
 
 ## Repository Structure
 
@@ -184,7 +173,7 @@ RULER/
 |-- retriever/                 # Dense retrieval and shared Qwen3 model
 |-- scripts/                   # Training, data construction, and evaluation entrypoints
 |-- docs/                      # Dataset and result notes
-|-- tests/                     # Behavioral and checkpoint smoke tests
+|-- tests/                     # Behavioral tests
 |-- build_train_dataset.py     # Stage 2 group construction
 |-- build_test_dataset.py      # Evaluation candidate construction
 |-- requirements.txt           # Python dependencies
@@ -200,14 +189,13 @@ RULER/
 | Train Stage 2 reranker | `bash scripts/train_ruler_reranker.sh` |
 | Evaluate retrieval and reranking | `bash scripts/benchmark_ruler.sh` |
 
-Both stages share the implementation in
-`retriever/llm2vec_lasttoken/modeling_qwen3_embed.py`. The historical
-`reranker/src/qwen3forall.py` module is retained as a compatibility import.
+Both stages import the shared model implementation from
+`retriever/llm2vec_lasttoken/modeling_qwen3_embed.py`.
 
 ## Installation
 
-RULER was recovered and verified with Python 3.9, PyTorch 2.4.0, CUDA 12.1,
-and Transformers 4.52.4.
+RULER was tested with Python 3.9, PyTorch 2.4.0, CUDA 12.1, and Transformers
+4.52.4.
 
 ```bash
 python -m venv .venv

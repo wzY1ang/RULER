@@ -26,7 +26,6 @@
 - [实验结果](#实验结果)
 - [数据集](#数据集)
 - [可用资源](#可用资源)
-- [发布计划](#发布计划)
 - [仓库结构](#仓库结构)
 - [核心入口](#核心入口)
 - [许可证](#许可证)
@@ -37,7 +36,6 @@
 ## 动态
 
 - **2026-07：** RULER 已正式发表于 SIGIR 2026 论文集。
-- **2026：** 论文已被第 49 届 ACM SIGIR Conference on Research and Development in Information Retrieval 接收。
 - **2026-07：** 已发布清理后的训练、数据构造和评估代码。
 
 ## 论文信息
@@ -73,7 +71,7 @@ RULER 由三个连续部分组成：Stage 1 检索微调、基于检索结果的
 
 ## 亮点
 
-- **单个 596M checkpoint：** 一个 Qwen3-0.6B checkpoint 同时支持检索和重排，避免部署两个独立模型。
+- **共享 596M 主干：** Stage 2 从 Stage 1 的 Qwen3-0.6B checkpoint 初始化，并添加 LoRA adapter。
 - **强大规模检索表现：** 在 LeCaRDv2-Stat 上达到 0.9001 MRR@100 和 0.8350 Recall@10。
 - **高精度重排表现：** 在 LeCaRDv2-Stat 上达到 0.8605 NDCG@10 和 0.7653 MAP@10。
 - **鲁棒零召回行为：** 在 JuDGE-Stat 上将 NR@R 降至 9.9%，降低高置信 Phantom Hits 风险。
@@ -94,7 +92,9 @@ RULER 保留经典的 retrieve-then-rerank 流程，但在两个阶段之间共�
 
 ### Stage 1：双塔检索
 
-检索阶段将 Qwen3-0.6B 微调为双塔检索器，使用 last-token pooling 和归一化向量表示查询与法条，并通过 FAISS 检索生成候选集合。
+检索阶段将 Qwen3-0.6B 微调为双塔检索器，使用 last-token pooling 和归一化
+向量表示查询与法条，再通过 FAISS 检索生成候选集合。本仓库保留归档实验实现，
+其注意力路径遵循 Qwen3 原生的 causal attention。
 
 ### Stage 2：交叉编码器重排
 
@@ -107,7 +107,7 @@ RULER 将动态间隔排序损失与最大熵正则化结合，在混合样本�
 
 ## 实验结果
 
-完整实验设置会随清理后的代码和复现脚本一同发布。以下结果来自已录用论文。
+以下数值来自已录用论文，训练与评估入口位于 `scripts/`。
 
 ### 检索结果
 
@@ -155,19 +155,6 @@ Hugging Face 数据集页面：[RULER-dataset/RULER](https://huggingface.co/data
 | 数据集页面 | 已在 Hugging Face 提供 |
 | 训练代码 | 已提供 |
 | 评估脚本 | 已提供 |
-| 模型权重 | Coming soon，取决于发布许可 |
-| 复现文档 | 已提供 |
-
-## 发布计划
-
-- [x] 论文被 SIGIR 2026 接收。
-- [x] 初版 README。
-- [x] 清理训练和评估脚本。
-- [x] 整理数据预处理流程。
-- [x] 添加可复现脚本入口。
-- [x] 发布处理后数据说明或链接。
-- [ ] 在许可允许时发布训练好的 checkpoint。
-- [x] 添加复现文档。
 
 ## 仓库结构
 
@@ -178,7 +165,7 @@ RULER/
 |-- retriever/                 # 稠密检索与共享 Qwen3 模型
 |-- scripts/                   # 训练、数据构建和评估入口
 |-- docs/                      # 数据与结果说明
-|-- tests/                     # 行为回归与 checkpoint 冒烟测试
+|-- tests/                     # 行为测试
 |-- build_train_dataset.py     # Stage 2 分组数据构造
 |-- build_test_dataset.py      # 评估候选构造
 |-- requirements.txt           # Python 依赖
@@ -194,7 +181,7 @@ RULER/
 | 训练 Stage 2 重排器 | `bash scripts/train_ruler_reranker.sh` |
 | 评估检索与重排 | `bash scripts/benchmark_ruler.sh` |
 
-两个阶段共享 `retriever/llm2vec_lasttoken/modeling_qwen3_embed.py` 中的模型实现。历史路径 `reranker/src/qwen3forall.py` 仅作为兼容导入保留。
+两个阶段均从 `retriever/llm2vec_lasttoken/modeling_qwen3_embed.py` 导入共享模型实现。
 
 ## 安装
 

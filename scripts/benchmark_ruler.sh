@@ -32,16 +32,12 @@ python "$REPO_ROOT/retriever/llm2vec_lasttoken/encode_with_qwen3.py" \
   --p_max_len "${D_MAX_LEN:-200}" \
   --batch_size "${ENCODE_BATCH_SIZE:-64}"
 
-(
-  cd "$REPO_ROOT/retriever"
-  python -m dense.faiss_retriever \
-    --query_reps "$ENCODE_DIR/query.pt" \
-    --passage_reps "$ENCODE_DIR/corpus.pt" \
-    --depth "${RETRIEVAL_DEPTH:-100}" \
-    --batch_size -1 \
-    --save_text \
-    --save_ranking_to "$OUTPUT_DIR/rank.tsv"
-)
+python "$REPO_ROOT/retriever/search_faiss.py" \
+  --query_reps "$ENCODE_DIR/query.pt" \
+  --passage_reps "$ENCODE_DIR/corpus.pt" \
+  --depth "${RETRIEVAL_DEPTH:-100}" \
+  --batch_size -1 \
+  --save_ranking_to "$OUTPUT_DIR/rank.tsv"
 
 python "$REPO_ROOT/retriever/llm2vec_lasttoken/reranker/src/eval_deep_ours.py" \
   --tsv "$RERANK_TSV" \

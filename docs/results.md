@@ -1,7 +1,7 @@
 # Reported Results
 
-These values are transcribed from the SIGIR 2026 paper. They are reference
-targets, not outputs generated during release packaging.
+These values are transcribed from the SIGIR 2026 paper and are provided as
+reference results.
 
 ## Retrieval
 
@@ -24,7 +24,7 @@ Top-50 candidates for Stage 2.
 
 The paper reports NR@R and score-distribution overlap for diagnosing phantom
 hits. `retriever/llm2vec_lasttoken/reranker/src/calc_dist_metrics.py` contains
-the recovered distribution-metric implementation.
+the distribution-metric implementation.
 
-Exact reproduction still requires the public dataset artifacts and the final
-released checkpoints listed in `RELEASE_CHECKLIST.md`.
+Dataset artifacts and model checkpoints are not redistributed in this
+repository.

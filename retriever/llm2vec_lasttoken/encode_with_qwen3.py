@@ -69,15 +69,14 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-    tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_name, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_name)
 
 
     if os.path.exists(os.path.join(args.model_name_or_path, "adapter_config.json")):
         print("[INFO] Detected LoRA adapter, loading base + adapter...")
         base_model = Qwen3ForEmbedding.from_pretrained(
             args.tokenizer_name,
-            device_map="auto",
-            trust_remote_code=True
+            device_map="auto"
         )
         model = PeftModel.from_pretrained(base_model, args.model_name_or_path)
 
@@ -89,8 +88,7 @@ def main():
         print("[INFO] Detected full model, loading directly...")
         model = Qwen3ForEmbedding.from_pretrained(
             args.model_name_or_path,
-            device_map="auto",
-            trust_remote_code=True
+            device_map="auto"
         )
 
     model = model.to(device)
@@ -103,7 +101,7 @@ def main():
     embeddings = encode(model, tokenizer, texts, max_len, device, batch_size=args.batch_size)
 
     torch.save((embeddings, text_ids), args.encoded_save_path)
-    print(f"[\u2713] Saved {len(embeddings)} embeddings to: {args.encoded_save_path}")
+    print(f"Saved {len(embeddings)} embeddings to: {args.encoded_save_path}")
 
 
 if __name__ == "__main__":

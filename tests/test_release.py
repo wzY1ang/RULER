@@ -18,18 +18,12 @@ from modeling_qwen3_embed import Qwen3ForEmbedding  # noqa: E402
 
 RERANKER_DIR = MODEL_DIR / "reranker" / "src"
 sys.path.insert(0, str(RERANKER_DIR))
-from qwen3forall import Qwen3ForEmbedding as CompatibilityQwen3ForEmbedding  # noqa: E402
 from train_lora import groupwise_loss  # noqa: E402
 from eval_deep_ours import calc_global_detailed_metrics  # noqa: E402
 
 
-class ModelImportTest(unittest.TestCase):
-    def test_reranker_uses_shared_model_implementation(self):
-        self.assertIs(CompatibilityQwen3ForEmbedding, Qwen3ForEmbedding)
-
-
-class LegacyAttentionTest(unittest.TestCase):
-    def test_original_checkpoint_path_remains_causal(self):
+class ModelForwardTest(unittest.TestCase):
+    def _make_model(self):
         torch.manual_seed(7)
         config = Qwen3Config(
             vocab_size=32,
@@ -47,16 +41,19 @@ class LegacyAttentionTest(unittest.TestCase):
         config.sliding_window = None
         config.base_model_tp_plan = {}
         config._attn_implementation = "eager"
-        config.bidirectional = True
-        model = Qwen3ForEmbedding(config).eval()
-        mask = torch.ones((1, 3), dtype=torch.long)
-        first = torch.tensor([[1, 2, 3]])
-        changed_future = torch.tensor([[1, 2, 4]])
+        return Qwen3ForEmbedding(config).eval()
 
-        causal_a = model.model(first, attention_mask=mask).last_hidden_state[:, 0]
-        causal_b = model.model(changed_future, attention_mask=mask).last_hidden_state[:, 0]
-        self.assertTrue(torch.allclose(causal_a, causal_b, atol=1e-6))
+    def test_embedding_and_reranking_outputs(self):
+        model = self._make_model()
+        input_ids = torch.tensor([[1, 2, 3], [4, 5, 6]])
+        mask = torch.ones_like(input_ids)
 
+        embeddings = model(input_ids, attention_mask=mask, mode="embedding")["embeddings"]
+        scores = model(input_ids, attention_mask=mask, mode="rerank")["scores"]
+
+        self.assertEqual(embeddings.shape, (2, model.config.hidden_size))
+        self.assertEqual(scores.shape, (2,))
+        self.assertTrue(torch.allclose(embeddings.norm(dim=1), torch.ones(2), atol=1e-6))
 
 class GroupBuilderTest(unittest.TestCase):
     def test_paper_group_policy(self):
@@ -120,8 +117,41 @@ class GroupBuilderTest(unittest.TestCase):
             )
 
 
+class FaissSearchTest(unittest.TestCase):
+    def test_exact_inner_product_ranking(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp = Path(temp_dir)
+            queries = temp / "queries.pt"
+            passages = temp / "passages.pt"
+            ranking = temp / "ranking.tsv"
+            torch.save((torch.tensor([[1.0, 0.0]]), ["q1"]), queries)
+            torch.save(
+                (torch.tensor([[0.0, 1.0], [1.0, 0.0]]), ["p1", "p2"]),
+                passages,
+            )
+
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(REPO_ROOT / "retriever" / "search_faiss.py"),
+                    "--query_reps",
+                    str(queries),
+                    "--passage_reps",
+                    str(passages),
+                    "--save_ranking_to",
+                    str(ranking),
+                    "--depth",
+                    "2",
+                ],
+                check=True,
+            )
+
+            rows = ranking.read_text(encoding="utf-8").splitlines()
+            self.assertTrue(rows[0].startswith("q1\tp2\t"))
+
+
 class RerankerObjectiveTest(unittest.TestCase):
-    def test_recovered_ruler_dynamic_margin_configuration(self):
+    def test_ruler_dynamic_margin_configuration(self):
         scores = torch.tensor([2.0, 0.0])
         labels = torch.tensor([1, 0])
         loss = groupwise_loss(

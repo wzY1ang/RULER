@@ -1,29 +1,17 @@
-# torchrun --nproc_per_node 8 eval_reranker_new.py \
-#   --tsv ./data/test_judge.tsv \
-#   --model_path ./checkpoints/qwen_lora_best \
-#   --output_dir ./eval_results/qwen_lora_best \
-#   --wandb_project legal-rag-eval \
-#   --wandb_name eval_lora_best_gap
-
-
-# eval_reranker_new.py
-# pip install torch transformers pandas tqdm wandb
 import argparse, os, json
+from pathlib import Path
+import sys
 import pandas as pd
 import torch
 import torch.distributed as dist
 from torch.utils.data import Dataset, DataLoader, DistributedSampler
 from tqdm import tqdm
 from transformers import AutoTokenizer, AutoConfig
-from qwen3forall import Qwen3ForEmbedding
 from peft import PeftModel
 
-
-try:
-    import wandb
-except ImportError:
-    wandb = None
-#
+MODEL_DIR = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(MODEL_DIR))
+from modeling_qwen3_embed import Qwen3ForEmbedding  # noqa: E402
 
 
 # ---------- dist utils ----------
@@ -57,9 +45,6 @@ def get_args():
     ap.add_argument("--debug_samples", type=int, default=5, help="Number of mixed-group rankings to print")
     ap.add_argument("--output_dir", default=None, help="Metrics output directory")
     ap.add_argument("--base_model_path", default=None, help="Base model path required for LoRA adapters")
-
-    ap.add_argument("--wandb_project", default="legal-rag-evaluation", help="Weights & Biases project")
-    ap.add_argument("--wandb_name", default=None, help="Weights & Biases run name")
 
     return ap.parse_args()
 
@@ -432,10 +417,6 @@ def main():
     out_dir = args.output_dir or args.model_path
     if is_main_process(rank):
         os.makedirs(out_dir, exist_ok=True)
-        if wandb:
-            run_name = args.wandb_name if args.wandb_name else (os.path.basename(out_dir) or "eval_run")
-            wandb.init(project=args.wandb_project, name=run_name, config=vars(args))
-            print(f"Weights & Biases initialized: project={args.wandb_project}, run={run_name}")
 
     if world_size > 1:
         dist.barrier()
@@ -460,13 +441,13 @@ def main():
         load_path = args.model_path
 
 
-    config = AutoConfig.from_pretrained(load_path, trust_remote_code=True)
+    config = AutoConfig.from_pretrained(load_path)
     if not hasattr(config, 'parallel_attn') or config.parallel_attn is None:
         config.parallel_attn = False
     if not hasattr(config, 'attn_implementation') or config.attn_implementation is None:
         config.attn_implementation = "eager"
 
-    tok = AutoTokenizer.from_pretrained(load_path, trust_remote_code=True)
+    tok = AutoTokenizer.from_pretrained(load_path)
     model = Qwen3ForEmbedding.from_pretrained(load_path, config=config).to(device)
 
 
@@ -521,10 +502,6 @@ def main():
             print(f"{k}: {v:.4f}" if isinstance(v, float) else f"{k}: {v}")
         print("="*60)
 
-
-        if wandb:
-            wandb.log(metrics)
-            print("Metrics logged to Weights & Biases")
 
         metrics_json = os.path.join(out_dir, "metrics_final.json")
         with open(metrics_json, "w", encoding="utf-8") as f:
@@ -597,11 +574,6 @@ def main():
 
 
 
-        if wandb:
-            wandb.log(metrics)
-            print("Metrics logged to Weights & Biases")
-
-
         metrics_json = os.path.join(out_dir, "metrics_final.json")
         with open(metrics_json, "w", encoding="utf-8") as f:
             json.dump(metrics, f, indent=2, ensure_ascii=False)
@@ -611,9 +583,6 @@ def main():
         print(f"Final metrics saved to {metrics_json} and metrics_final.csv")
 
 
-
-        if wandb:
-            wandb.finish()
 
     cleanup()
 

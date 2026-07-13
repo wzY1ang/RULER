@@ -37,13 +37,9 @@ python "$REPO_ROOT/retriever/llm2vec_lasttoken/encode_with_qwen3.py" \
   --p_max_len "$D_MAX_LEN" \
   --batch_size "$ENCODE_BATCH_SIZE"
 
-(
-  cd "$REPO_ROOT/retriever"
-  python -m dense.faiss_retriever \
-    --query_reps "$QUERY_REPS_PATH" \
-    --passage_reps "$CORPUS_REPS_PATH" \
-    --depth "$RETRIEVAL_DEPTH" \
-    --batch_size "$RETRIEVAL_BATCH_SIZE" \
-    --save_text \
-    --save_ranking_to "$OUTPUT_RANK_PATH"
-)
+python "$REPO_ROOT/retriever/search_faiss.py" \
+  --query_reps "$QUERY_REPS_PATH" \
+  --passage_reps "$CORPUS_REPS_PATH" \
+  --depth "$RETRIEVAL_DEPTH" \
+  --batch_size "$RETRIEVAL_BATCH_SIZE" \
+  --save_ranking_to "$OUTPUT_RANK_PATH"

@@ -8,9 +8,3 @@ pandas>=2.0
 scikit-learn>=1.4
 matplotlib>=3.8
 tqdm>=4.67
-jieba==0.42.1
-nltk==3.9.1
-Levenshtein==0.25.1
-chinese2digits==6.0.2
-beautifulsoup4==4.13.3
-cn2an==0.5.23

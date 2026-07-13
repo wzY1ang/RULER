@@ -113,11 +113,10 @@ def main():
 
     set_seed(args.seed)
 
-    tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_name, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_name)
 
 
-    model = Qwen3ForEmbedding.from_pretrained(args.model_name_or_path, trust_remote_code=True)
-    model.config.bidirectional = True
+    model = Qwen3ForEmbedding.from_pretrained(args.model_name_or_path)
 
 
 
