@@ -3,9 +3,11 @@
 **RULER: 面向法律信息检索的鲁棒统一式 LLM 高效检索框架**
 
 <p align="center">
-  <a href="https://sigir.org/sigir2026/"><img src="https://img.shields.io/badge/Venue-SIGIR%202026-blue" alt="SIGIR 2026"></a>
-  <img src="https://img.shields.io/badge/Status-Code%20Released-brightgreen" alt="Code released">
-  <img src="https://img.shields.io/badge/Backbone-Qwen3--0.6B-blueviolet" alt="Qwen3-0.6B">
+  <a href="https://sigir2026.org/"><img src="https://img.shields.io/badge/Venue-SIGIR%202026-blue" alt="SIGIR 2026"></a>
+  <a href="https://doi.org/10.1145/3805712.3809698"><img src="https://img.shields.io/badge/Paper-ACM%20Digital%20Library-0085CA" alt="ACM Digital Library 论文链接"></a>
+  <a href="https://huggingface.co/datasets/RULER-dataset/RULER"><img src="https://img.shields.io/badge/Dataset-Hugging%20Face-FFD21E" alt="Hugging Face 数据集"></a>
+  <a href="#核心入口"><img src="https://img.shields.io/badge/Status-Code%20Released-brightgreen" alt="代码已发布"></a>
+  <a href="https://huggingface.co/Qwen/Qwen3-0.6B"><img src="https://img.shields.io/badge/Backbone-Qwen3--0.6B-blueviolet" alt="Qwen3-0.6B"></a>
 </p>
 
 **语言：** [English](README.md) | 简体中文

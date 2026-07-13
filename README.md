@@ -3,9 +3,11 @@
 **RULER: Robust Unified LLM-based Efficient Retrieval for Legal Information**
 
 <p align="center">
-  <a href="https://sigir.org/sigir2026/"><img src="https://img.shields.io/badge/Venue-SIGIR%202026-blue" alt="SIGIR 2026"></a>
-  <img src="https://img.shields.io/badge/Status-Code%20Released-brightgreen" alt="Code released">
-  <img src="https://img.shields.io/badge/Backbone-Qwen3--0.6B-blueviolet" alt="Qwen3-0.6B">
+  <a href="https://sigir2026.org/"><img src="https://img.shields.io/badge/Venue-SIGIR%202026-blue" alt="SIGIR 2026"></a>
+  <a href="https://doi.org/10.1145/3805712.3809698"><img src="https://img.shields.io/badge/Paper-ACM%20Digital%20Library-0085CA" alt="Paper on ACM Digital Library"></a>
+  <a href="https://huggingface.co/datasets/RULER-dataset/RULER"><img src="https://img.shields.io/badge/Dataset-Hugging%20Face-FFD21E" alt="Dataset on Hugging Face"></a>
+  <a href="#core-entry-points"><img src="https://img.shields.io/badge/Status-Code%20Released-brightgreen" alt="Code released"></a>
+  <a href="https://huggingface.co/Qwen/Qwen3-0.6B"><img src="https://img.shields.io/badge/Backbone-Qwen3--0.6B-blueviolet" alt="Qwen3-0.6B"></a>
 </p>
 
 **Language:** English | [简体中文](README.zh-CN.md)
